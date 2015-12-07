@@ -10,6 +10,7 @@ import SdeArchivistProperties
 if __name__ == "__main__":
 
     props = SdeArchivistProperties.SdeArchivistProperties("config/archivist_config.json")
+    print props.ldap_config
     connection = OracleConnection(props.database_config).connection()
     meta_data_service = MetaDataService.MetaDataService(connection)
     metadata = meta_data_service.find_flagged_meta_data()

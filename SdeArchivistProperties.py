@@ -10,6 +10,7 @@ class SdeArchivistProperties:
         self.__ref = ref
         self.tag_config = {}
         self.database_config = {}
+        self.ldap_config = {}
         self.__read_config()
 
     def __read_config(self):
@@ -18,6 +19,7 @@ class SdeArchivistProperties:
             self.__config = json.loads(config_stream.read())
             self.tag_config = self.__extract_tag_config(self.__config)
             self.database_config = self.__extract_db_config(self.__config)
+            self.ldap_config = self.__extract_ldap_config(self.__config)
         finally:
             config_stream.close()
 
@@ -33,6 +35,13 @@ class SdeArchivistProperties:
             else:
                 raise ValueError("Missing database config entry (url, port, service, username, password)")
 
+    def __extract_ldap_config(self, dct):
+        if "ldap_config" in dct:
+            if self.__validate_ldap_config(dct["ldap_config"]):
+                return dct["ldap_config"]
+            else:
+                raise ValueError("Missing ldap config entry (server, dn)")
+
     def __validate_db_config(self,config):
         valid_config = True
         if "url" not in config:
@@ -44,6 +53,14 @@ class SdeArchivistProperties:
         if "username" not in config:
             valid_config = False
         if "password" not in config:
+            valid_config = False
+        return valid_config
+
+    def __validate_ldap_config(self,config):
+        valid_config = True
+        if "server" not in config:
+            valid_config = False
+        if "dn" not in config:
             valid_config = False
         return valid_config
 
