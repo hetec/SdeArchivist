@@ -5,13 +5,14 @@ import MetaDataService
 import MetaDataValidator
 import MetaData
 import SdeArchivistProperties
+import LdapService
 
 
 if __name__ == "__main__":
 
     props = SdeArchivistProperties.SdeArchivistProperties("config/archivist_config.json")
-    print props.ldap_config
     connection = OracleConnection(props.database_config).connection()
+    ldap = LdapService.LdapService(props.ldap_config)
     meta_data_service = MetaDataService.MetaDataService(connection)
     metadata = meta_data_service.find_flagged_meta_data()
 
@@ -28,3 +29,5 @@ if __name__ == "__main__":
         print m + "::" + meta.meta_data()[m]
 
     print meta.is_valid()
+
+    print(ldap.get_email_by_uid("hebner"))
