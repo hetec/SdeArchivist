@@ -11,6 +11,7 @@ import LdapService
 if __name__ == "__main__":
 
     props = SdeArchivistProperties.SdeArchivistProperties("config/archivist_config.json")
+    print props.mail_config
     connection = OracleConnection(props.database_config).connection()
     ldap = LdapService.LdapService(props.ldap_config)
     meta_data_service = MetaDataService.MetaDataService(connection)
