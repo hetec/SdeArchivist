@@ -78,6 +78,8 @@ class SdeArchivistProperties:
             valid_config = False
         if "password" not in config:
             valid_config = False
+        if "username" not in config:
+            valid_config = False
         if "failure_message" not in config:
             valid_config = False
         if "additional_recipients" not in config:
