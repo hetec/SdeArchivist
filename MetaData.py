@@ -7,7 +7,7 @@ class MetaData:
     Represents the meta data of a SDE entry
     """
     def __init__(self):
-        self.__is_valid = False
+        self.__is_valid = True
         self.__meta_data = {}
 
     def add_meta_data(self, name, value):
@@ -34,7 +34,15 @@ class MetaData:
         :param value: Value to mark the meta data as valid (Boolean, Default: False)
         :return: void
         """
-        self.__is_valid == value
+        self.__is_valid = value
+
+    def is_valid(self):
+        """
+        Shows if the meta data are valid
+
+        :return: If the meta data are valid (Boolean)
+        """
+        return self.__is_valid
 
 if __name__ == "__main__":
     meta = MetaData()

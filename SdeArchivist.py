@@ -3,7 +3,7 @@
 from OracleConnection import OracleConnection
 import MetaDataService
 import MetaDataValidator
-import RequiredTag
+import MetaData
 import SdeArchivistProperties
 
 
@@ -17,8 +17,13 @@ if __name__ == "__main__":
     tags = props.tag_config
     print tags
 
+    meta = MetaData.MetaData()
     for xml in metadata:
         out = "{0:>40} :: {1}".format(xml, metadata[xml])
         print out
-        MetaDataValidator.MetaDataValidator(metadata[xml], tags).validate()
+        MetaDataValidator.MetaDataValidator(metadata[xml], tags).validate(meta)
 
+    for m in meta.meta_data():
+        print m + "::" + meta.meta_data()[m]
+
+    print meta.is_valid()

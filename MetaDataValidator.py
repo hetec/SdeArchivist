@@ -21,31 +21,42 @@ class MetaDataValidator:
         self.__xml = xml
         self.__required_tags = required_tags
 
-    def validate(self):
+    def validate(self, meta_data):
         """
         Starts the validation process on the data specified on the creation of the validator
 
+        :param meta_data: The meta data container which gets filled during the validation.
         :raises: Exception if a tag is missing
         :raises: Exception if a tag has no content, however it's defined to have one
         """
         found_tags = self.__find_all_xml_tags(self.__required_tags)
-        self.__validate_tag(found_tags)
+        self.__validate_tag(found_tags, meta_data)
 
-    def __validate_tag(self, found_tags):
+    def __validate_tag(self, found_tags, meta_data):
         for tag in self.__required_tags:
-            self.__validate_existence(tag, found_tags)
-            self.__validate_not_empty(tag, found_tags)
+            exists = self.__validate_existence(tag, found_tags)
+            if exists is not None:
+                meta_data.add_meta_data(exists[0], exists[1])
+                if exists[1] == "MISSING" and meta_data.is_valid() is True:
+                    meta_data.set_valid(False)
+            has_content = self.__validate_not_empty(tag, found_tags)
+            if has_content is not None:
+                if has_content[1] == "CONTENT EXPECTED" and meta_data.is_valid() is True:
+                    meta_data.set_valid(False)
+                meta_data.add_meta_data(has_content[0], has_content[1])
         return True
 
     def __validate_existence(self, tag, found_tags):
         if str(tag.tag_name()) not in found_tags:
-            raise Exception("Missing tag")
+            return tag.tag_name(), "MISSING"
+        else:
+            return tag.tag_name(), "OK"
 
     def __validate_not_empty(self, required_tag, found_tags):
-        if not required_tag.is_empty():
+        if not required_tag.is_empty() and required_tag.tag_name() in found_tags:
             if not (False if (found_tags[required_tag.tag_name()].text is None)
                     else len(found_tags[required_tag.tag_name()].text)) > 0:
-                raise Exception("No content")
+                return required_tag.tag_name(), "CONTENT EXPECTED"
 
     def __find_xml_tag(self, tag_name):
         root = etree.fromstring(self.__xml)
