@@ -1,0 +1,37 @@
+{
+  "database_config" : {
+    "url" : "",
+    "port" :  "",
+    "service" :  "",
+    "username" : "",
+    "password" : ""
+  },
+  "ldap_config" : {
+    "server" : "",
+    "dn" : ""
+  },
+  "mail_config" : {
+    "smtp_server" : "",
+    "port" : "",
+    "from" : "",
+    "username" : "",
+    "password" : "!",
+    "additional_recipients" : [],
+    "subject" : "",
+    "failure_message" : ""
+  },
+  "tag_config" : {
+    "required" : [
+      {
+        "tag_name" : ""
+      },
+      {
+        "tag_name" : "",
+        "is_empty" : true,
+        "attributes" : []
+      }
+    ]
+  }
+}
+
+
