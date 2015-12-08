@@ -26,11 +26,10 @@ class MetaDataValidator:
         Starts the validation process on the data specified on the creation of the validator
 
         :param meta_data: The meta data container which gets filled during the validation.
-        :raises: Exception if a tag is missing
-        :raises: Exception if a tag has no content, however it's defined to have one
         """
-        found_tags = self.__find_all_xml_tags(self.__required_tags)
-        self.__validate_tag(found_tags, meta_data)
+
+        for tag in self.__required_tags:
+            self.__find_xml_tag(self.__required_tags[tag],meta_data)
 
     def __validate_tag(self, found_tags, meta_data):
         for tag in self.__required_tags:
@@ -46,40 +45,60 @@ class MetaDataValidator:
                 meta_data.add_meta_data(has_content[0], has_content[1])
         return True
 
-    def __validate_existence(self, tag, found_tags):
-        if str(tag.tag_name()) not in found_tags:
-            return tag.tag_name(), "MISSING"
-        else:
-            return tag.tag_name(), "OK"
-
-    def __validate_not_empty(self, required_tag, found_tags):
-        if not required_tag.is_empty() and required_tag.tag_name() in found_tags:
-            if not (False if (found_tags[required_tag.tag_name()].text is None)
-                    else len(found_tags[required_tag.tag_name()].text)) > 0:
-                return required_tag.tag_name(), "CONTENT EXPECTED"
-        elif required_tag.is_empty() and required_tag.tag_name() in found_tags:
-            print "Checking empty tag: " + required_tag.tag_name()
-            if not self.__validate_attribute("value", found_tags[required_tag.tag_name()]):
-                return required_tag.tag_name(), "No attribute 'value'"
-        return required_tag.tag_name(), "OK"
-
-    def __validate_attribute(self, attr_name, tag_name):
+    def __validate_attribute(self, attribute_names, tag_name):
         attributes = tag_name.attrib
-        for a in attributes:
-            print a + "-->" + attributes[a]
-        if attr_name in attributes and len(attributes[a]) > 0:
-            return True
+        missing_attr = []
+        if len(attribute_names) > 0:
+            if len(attributes) > 0:
+                for a in attribute_names:
+                    if a in attributes:
+                        if len(attributes[a]) > 0:
+                            missing_attr.append(a)
+                    else:
+                        missing_attr.append(a)
+                if len(missing_attr) > 0:
+                    result = "Missing attributes: "
+                    for a in missing_attr:
+                        result += str(a) + " "
+                    print "Result: " + result
+                    return result
+                else:
+                    return ""
+            else:
+                result = "Missing attributes: "
+                for a in attribute_names:
+                    result += str(a) + " "
+                    print "Result: " + result
+                return result
         else:
-            return False
+            return ""
 
-    def __find_xml_tag(self, tag_name):
+    def __find_xml_tag(self, tag_name, meta_data):
         root = etree.fromstring(self.__xml)
-        print "ROOT:"
-        tag_instances = root.findall(".//" + tag_name)
+        tag_instances = root.findall(".//" + tag_name.tag_name())
+        if tag_instances:
+            for tag in tag_instances:
+                msg = self.__validate_not_empty(tag, tag_name)
+                meta_data.add_meta_data(tag_name.tag_name(), msg)
+        else:
+            meta_data.add_meta_data(tag_name.tag_name(), "Missing")
+            if meta_data.is_valid() is True:
+                meta_data.set_valid(False)
         return tag_instances
 
-    def __find_all_xml_tags(self, tags):
-        tag_buffer = []
-        for tag in tags:
-            tag_buffer.extend(self.__find_xml_tag(tag.tag_name()))
-        return {tag.tag: tag for tag in tag_buffer}
+    def __validate_not_empty(self, tag, tag_config):
+        if not tag_config.is_empty():
+            if not (False if (tag.text is None)
+                    else len(tag.text)) > 0:
+                return tag_config.tag_name(), "CONTENT EXPECTED"
+            else:
+                attr_check = self.__validate_attribute(tag_config.attributes(),tag)
+                if len(attr_check) > 0:
+                    return attr_check
+        elif tag_config.is_empty():
+            attr_check = self.__validate_attribute(tag_config.attributes(), tag)
+            if len(attr_check) > 0:
+                return attr_check
+        return "OK"
+
+

@@ -19,11 +19,11 @@ if __name__ == "__main__":
 
     required_tags = props.tag_config
     print required_tags
+    print required_tags
 
     for xml in raw_meta:
         validated_meta = MetaData.MetaData()
         MetaDataValidator.MetaDataValidator(raw_meta[xml], required_tags).validate(validated_meta)
-        #print(ldap.get_email_by_uid(xml.split(".")[0]))
         if validated_meta.is_valid():
             print "OK!"
         else:
