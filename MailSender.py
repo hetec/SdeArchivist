@@ -14,17 +14,22 @@ class MailSender:
         self.__props = properties
         print self.__props["port"]
         #only ascii for the server and port
-        self.__smtpObj = smtplib.SMTP(str(self.__props["smtp_server"]),str(self.__props["port"]))
+        self.__smtpObj = smtplib.SMTP(str(self.__props["smtp_server"]), str(self.__props["port"]))
         self.__smtpObj.starttls()
 
     def send(self, to, content):
         self.__smtpObj.login(self.__props["username"], self.__props["password"])
-        msg = multipart.MIMEMultipart()
-        from_addr = self.__props["from"]
-        msg["FROM"] = from_addr
         tos_addr = [to]
         tos_addr.extend(self.__props["additional_recipients"])
-        msg["TO"] = to;
+        print tos_addr
+        print type(tos_addr)
+        self.__smtpObj.sendmail("patrick.hebner@ufz.de", tos_addr, self.__build_msg(tos_addr, content))
+        self.__smtpObj.quit()
+
+    def __build_msg(self, to, content):
+        msg = multipart.MIMEMultipart()
+        msg["FROM"] = self.__props["from"]
+        msg["TO"] = ",".join(to)
         msg["Subject"] = self.__props["subject"]
 
         body = self.__props["failure_message"]
@@ -32,8 +37,8 @@ class MailSender:
 
         msg.attach(mimetext.MIMEText(body, "plain"))
 
-        self.__smtpObj.sendmail("patrick.hebner@ufz.de", tos_addr, msg.as_string());
-        self.__smtpObj.quit()
+        return msg.as_string()
+
 
 if __name__ == "__main__":
     props = SdeArchivistProperties.SdeArchivistProperties("config/archivist_config.json").mail_config
