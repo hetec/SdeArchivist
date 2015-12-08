@@ -7,29 +7,28 @@ import MetaData
 import SdeArchivistProperties
 import LdapService
 import MetaDataRenderer
-
+import MailSender
 
 if __name__ == "__main__":
 
     props = SdeArchivistProperties.SdeArchivistProperties("config/archivist_config.json")
-    print props.mail_config
     connection = OracleConnection(props.database_config).connection()
     ldap = LdapService.LdapService(props.ldap_config)
     meta_data_service = MetaDataService.MetaDataService(connection)
-    metadata = meta_data_service.find_flagged_meta_data()
+    raw_meta = meta_data_service.find_flagged_meta_data()
 
-    tags = props.tag_config
-    print tags
+    required_tags = props.tag_config
+    print required_tags
 
-    meta = MetaData.MetaData()
-    for xml in metadata:
-        out = "{0:>40} :: {1}".format(xml, metadata[xml])
-        print out
-        MetaDataValidator.MetaDataValidator(metadata[xml], tags).validate(meta)
+    for xml in raw_meta:
+        validated_meta = MetaData.MetaData()
+        MetaDataValidator.MetaDataValidator(raw_meta[xml], required_tags).validate(validated_meta)
+        #print(ldap.get_email_by_uid(xml.split(".")[0]))
+        if validated_meta.is_valid():
+            print "OK!"
+        else:
+            ms = MailSender.MailSender(props.mail_config)
+            out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
+            ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out)
 
-    mr = MetaDataRenderer.MetaDataRenderer(meta)
-    rm = mr.render_txt_table()
-    print rm
-    print meta.is_valid()
 
-    print(ldap.get_email_by_uid("hebner"))
