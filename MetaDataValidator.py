@@ -41,7 +41,7 @@ class MetaDataValidator:
                     meta_data.set_valid(False)
             has_content = self.__validate_not_empty(tag, found_tags)
             if has_content is not None:
-                if has_content[1] == "CONTENT EXPECTED" and meta_data.is_valid() is True:
+                if has_content[1] is not "OK" and meta_data.is_valid() is True:
                     meta_data.set_valid(False)
                 meta_data.add_meta_data(has_content[0], has_content[1])
         return True
@@ -57,9 +57,24 @@ class MetaDataValidator:
             if not (False if (found_tags[required_tag.tag_name()].text is None)
                     else len(found_tags[required_tag.tag_name()].text)) > 0:
                 return required_tag.tag_name(), "CONTENT EXPECTED"
+        elif required_tag.is_empty() and required_tag.tag_name() in found_tags:
+            print "Checking empty tag: " + required_tag.tag_name()
+            if not self.__validate_attribute("value", found_tags[required_tag.tag_name()]):
+                return required_tag.tag_name(), "No attribute 'value'"
+        return required_tag.tag_name(), "OK"
+
+    def __validate_attribute(self, attr_name, tag_name):
+        attributes = tag_name.attrib
+        for a in attributes:
+            print a + "-->" + attributes[a]
+        if attr_name in attributes and len(attributes[a]) > 0:
+            return True
+        else:
+            return False
 
     def __find_xml_tag(self, tag_name):
         root = etree.fromstring(self.__xml)
+        print "ROOT:"
         tag_instances = root.findall(".//" + tag_name)
         return tag_instances
 

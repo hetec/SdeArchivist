@@ -29,6 +29,7 @@ if __name__ == "__main__":
         else:
             ms = MailSender.MailSender(props.mail_config)
             out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
-            ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out)
+            #ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out)
+            print out
 
 
