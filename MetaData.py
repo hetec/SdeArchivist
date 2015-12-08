@@ -22,7 +22,7 @@ class MetaData:
 
     def meta_data(self):
         """
-        Returns a defensive copy of the contained meta data as dictionary
+        Returns a defensive copy of the contained meta data as dictionary {name:state}
 
         :return: dictionary with meta data
         """
@@ -43,6 +43,7 @@ class MetaData:
         :return: If the meta data are valid (Boolean)
         """
         return self.__is_valid
+
 
 if __name__ == "__main__":
     meta = MetaData()

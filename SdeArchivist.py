@@ -6,6 +6,7 @@ import MetaDataValidator
 import MetaData
 import SdeArchivistProperties
 import LdapService
+import MetaDataRenderer
 
 
 if __name__ == "__main__":
@@ -26,9 +27,9 @@ if __name__ == "__main__":
         print out
         MetaDataValidator.MetaDataValidator(metadata[xml], tags).validate(meta)
 
-    for m in meta.meta_data():
-        print m + "::" + meta.meta_data()[m]
-
+    mr = MetaDataRenderer.MetaDataRenderer(meta)
+    rm = mr.render_txt_table()
+    print rm
     print meta.is_valid()
 
     print(ldap.get_email_by_uid("hebner"))
