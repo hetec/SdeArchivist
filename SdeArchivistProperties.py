@@ -12,6 +12,7 @@ class SdeArchivistProperties:
         self.database_config = {}
         self.ldap_config = {}
         self.mail_config = {}
+        self.sde_config = {}
         self.__read_config()
 
     def __read_config(self):
@@ -22,6 +23,7 @@ class SdeArchivistProperties:
             self.database_config = self.__extract_db_config(self.__config)
             self.ldap_config = self.__extract_ldap_config(self.__config)
             self.mail_config = self.__extract_mail_config(self.__config)
+            self.sde_config = self.__extract_sde_config(self.__config)
         finally:
             config_stream.close()
 
@@ -55,6 +57,14 @@ class SdeArchivistProperties:
                 raise ValueError("Missing mail config entry "
                                  "(smtp_server, port, from, subject, password, failure_text, additional_recipients)")
 
+    def __extract_sde_config(self, dct):
+        if "sde_config" in dct:
+            if self.__validate_sde_config(dct["sde_config"]):
+                return dct["sde_config"]
+            else:
+                raise ValueError("Missing sde config entry "
+                                 "(connectionFilePath, database_type, instance_name, auth_method, username, password)")
+
     def __validate_db_config(self, config):
         valid_config = True
         if "url" not in config:
@@ -86,6 +96,22 @@ class SdeArchivistProperties:
         if "failure_message" not in config:
             valid_config = False
         if "additional_recipients" not in config:
+            valid_config = False
+        return valid_config
+
+    def __validate_sde_config(self, config):
+        valid_config = True
+        if "connection_file_path" not in config:
+            valid_config = False
+        if "database_type" not in config:
+            valid_config = False
+        if "instance_name" not in config:
+            valid_config = False
+        if "auth_method" not in config:
+            valid_config = False
+        if "username" not in config:
+            valid_config = False
+        if "password" not in config:
             valid_config = False
         return valid_config
 
