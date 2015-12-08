@@ -6,6 +6,14 @@
     "username" : "",
     "password" : ""
   },
+  "sde_config" : {
+    "connection_file_path" : "",
+    "database_type" : "",
+    "instance_name" : "",
+    "auth_method" : "",
+    "username" : "",
+    "password" : ""
+  },
   "ldap_config" : {
     "server" : "",
     "dn" : ""
