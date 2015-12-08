@@ -3,8 +3,8 @@ import io
 import json
 import RequiredTag
 
-class SdeArchivistProperties:
 
+class SdeArchivistProperties:
     def __init__(self, ref):
         self.__config = ""
         self.__ref = ref
@@ -27,8 +27,11 @@ class SdeArchivistProperties:
 
     def __extract_tag_config(self, dct):
         if "tag_config" in dct:
-            return [RequiredTag.RequiredTag(entry["tag_name"], entry["is_empty"] if "is_empty" in entry else False)
-                    for entry in dct["tag_config"]["required"]]
+            return {str(entry["tag_name"]): RequiredTag.RequiredTag(
+                entry["tag_name"],
+                entry["is_empty"] if "is_empty" in entry else False,
+                entry["attributes"] if "attributes" in entry else [])
+                    for entry in dct["tag_config"]["required"]}
 
     def __extract_db_config(self, dct):
         if "database_config" in dct:
@@ -52,7 +55,7 @@ class SdeArchivistProperties:
                 raise ValueError("Missing mail config entry "
                                  "(smtp_server, port, from, subject, password, failure_text, additional_recipients)")
 
-    def __validate_db_config(self,config):
+    def __validate_db_config(self, config):
         valid_config = True
         if "url" not in config:
             valid_config = False
@@ -66,7 +69,7 @@ class SdeArchivistProperties:
             valid_config = False
         return valid_config
 
-    def __validate_mail_config(self,config):
+    def __validate_mail_config(self, config):
         valid_config = True
         if "smtp_server" not in config:
             valid_config = False
@@ -86,13 +89,14 @@ class SdeArchivistProperties:
             valid_config = False
         return valid_config
 
-    def __validate_ldap_config(self,config):
+    def __validate_ldap_config(self, config):
         valid_config = True
         if "server" not in config:
             valid_config = False
         if "dn" not in config:
             valid_config = False
         return valid_config
+
 
 if __name__ == "__main__":
     props = SdeArchivistProperties("config/archivist_config.json")
