@@ -1,4 +1,5 @@
 # -*- encoding utf-8 -*-
+import copy
 
 
 class RequiredTag:
@@ -6,15 +7,17 @@ class RequiredTag:
     Represents a tag which is required by valid meta data
     """
 
-    def __init__(self, tag_name, is_empty=False):
+    def __init__(self, tag_name, is_empty=False, attributes=[]):
         """
         Creates a new RequiredTag object
 
         :param tag_name: The name of the tag (String)
+        :param attributes: The required attributes of this tag
         :param is_empty: Defines if a tag has content or not (Boolean, Default: False)
         :return: New RequiredTag object
         """
         self.__tag_name = tag_name
+        self.__attributes = attributes
         self.__is_empty_tag = is_empty
 
     def tag_name(self):
@@ -32,3 +35,6 @@ class RequiredTag:
         :return: True if the tag is empty else False (Boolean)
         """
         return self.__is_empty_tag
+
+    def attributes(self):
+        return copy.copy(self.__attributes)
