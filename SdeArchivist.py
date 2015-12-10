@@ -27,11 +27,12 @@ if __name__ == "__main__":
     print required_tags
 
     for xml in raw_meta:
+        print "\n1) VALIDATION OF: " + xml + "\n"
         validated_meta = MetaData.MetaData()
         MetaDataValidator.MetaDataValidator(raw_meta[xml], required_tags).validate(validated_meta)
         if validated_meta.is_valid():
             print "OK!"
-            print xml
+            print "\n2) EXPORT OF: " + xml + "\n"
             xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf).export(xml)
         else:
             ms = MailSender.MailSender(props.mail_config)

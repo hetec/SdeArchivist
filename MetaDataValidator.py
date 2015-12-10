@@ -31,19 +31,22 @@ class MetaDataValidator:
         for tag in self.__required_tags:
             self.__find_xml_tag(self.__required_tags[tag],meta_data)
 
-    def __validate_tag(self, found_tags, meta_data):
-        for tag in self.__required_tags:
-            exists = self.__validate_existence(tag, found_tags)
-            if exists is not None:
-                meta_data.add_meta_data(exists[0], exists[1])
-                if exists[1] == "MISSING" and meta_data.is_valid() is True:
-                    meta_data.set_valid(False)
-            has_content = self.__validate_not_empty(tag, found_tags)
-            if has_content is not None:
-                if has_content[1] is not "OK" and meta_data.is_valid() is True:
-                    meta_data.set_valid(False)
-                meta_data.add_meta_data(has_content[0], has_content[1])
-        return True
+    # def __validate_tag(self, found_tags, meta_data):
+    #     for tag in self.__required_tags:
+    #         exists = self.__validate_existence(tag, found_tags)
+    #         if exists is not None:
+    #             meta_data.add_meta_data(exists[0], exists[1])
+    #             if exists[1] is not "MISSING" and meta_data.is_valid() is True:
+    #                 print "IS OK? " + exists[1]
+    #                 meta_data.set_valid(False)
+    #         has_content = self.__validate_not_empty(tag, found_tags)
+    #         print has_content
+    #         if has_content is not None:
+    #             print "IS OK? " + has_content[1]
+    #             if has_content[1] is not "OK" and meta_data.is_valid() is True:
+    #                 meta_data.set_valid(False)
+    #             meta_data.add_meta_data(has_content[0], has_content[1])
+    #     return True
 
     def __validate_attribute(self, attribute_names, tag_name):
         attributes = tag_name.attrib
@@ -52,7 +55,7 @@ class MetaDataValidator:
             if len(attributes) > 0:
                 for a in attribute_names:
                     if a in attributes:
-                        if len(attributes[a]) > 0:
+                        if len(attributes[a]) <= 0:
                             missing_attr.append(a)
                     else:
                         missing_attr.append(a)
@@ -60,7 +63,6 @@ class MetaDataValidator:
                     result = "Missing attributes: "
                     for a in missing_attr:
                         result += str(a) + " "
-                    print "Result: " + result
                     return result
                 else:
                     return ""
@@ -68,7 +70,6 @@ class MetaDataValidator:
                 result = "Missing attributes: "
                 for a in attribute_names:
                     result += str(a) + " "
-                    print "Result: " + result
                 return result
         else:
             return ""
@@ -80,6 +81,8 @@ class MetaDataValidator:
             for tag in tag_instances:
                 msg = self.__validate_not_empty(tag, tag_name)
                 meta_data.add_meta_data(tag_name.tag_name(), msg)
+                if msg is not "OK" and meta_data.is_valid() is True:
+                    meta_data.set_valid(False)
         else:
             meta_data.add_meta_data(tag_name.tag_name(), "Missing")
             if meta_data.is_valid() is True:

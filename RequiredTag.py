@@ -7,7 +7,7 @@ class RequiredTag:
     Represents a tag which is required by valid meta data
     """
 
-    def __init__(self, tag_name, is_empty=False, attributes=[]):
+    def __init__(self, tag_name, is_empty=False, attributes=()):
         """
         Creates a new RequiredTag object
 

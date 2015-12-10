@@ -34,13 +34,13 @@ class XmlWorkspaceExporter:
         print "---------XMLExporter---------"
         print "INPUT: " + input_file
         print "OUTPUT: " + output_file
-        print "Export to xml file -> " + data.encode('ascii', 'ignore')
         try:
             arcpy.ExportXMLWorkspaceDocument_management(input_file,
                                                         output_file,
                                                         "DATA",
                                                         "BINARY",
                                                         "METADATA")
+            print "\nExport to xml file -> " + data.encode('ascii', 'ignore') + " is finished!"
         except arcpy.ExecuteError as e:
             raise XMLWorkspaceDocumentExportError("Error while creating XMLWorkspaceDocument: " + e.message)
 
