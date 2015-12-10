@@ -6,6 +6,19 @@ import RequiredTag
 
 class SdeArchivistProperties:
     def __init__(self, ref):
+        """
+        Creates a new SdeArchivistProperties instance containing the config data
+
+        Properties:
+            tag_config (Dictionary)
+            database_config (Dictionary)
+            ldap_config (Dictionary)
+            mail_config (Dictionary)
+            sde_config (Dictionary)
+
+        :param ref: The location of the 'archivist_config.json' configuration file
+        :return: new SdeArchivistProperties instance
+        """
         self.__config = ""
         self.__ref = ref
         self.tag_config = {}

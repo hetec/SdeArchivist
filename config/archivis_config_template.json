@@ -23,7 +23,7 @@
     "port" : "",
     "from" : "",
     "username" : "",
-    "password" : "!",
+    "password" : "",
     "additional_recipients" : [],
     "subject" : "",
     "failure_message" : ""
