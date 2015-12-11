@@ -31,7 +31,6 @@ class XmlWorkspaceExporter:
         data = data.strip(" \t")
         output_file = location + "/" + data.encode('ascii', 'ignore') + ".xml"
         output_file = self.__check_file_name(output_file, data.encode('ascii', 'ignore'))
-        print "---------XMLExporter---------"
         print "INPUT: " + input_file
         print "OUTPUT: " + output_file
         try:
