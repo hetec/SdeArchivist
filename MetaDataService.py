@@ -18,6 +18,10 @@ class MetaDataService:
         self.con = connection
 
     def find_all_requests(self):
+        """
+        Queries all dataset names by the names in the ArcGIS requests table
+        :return: Names (List)
+        """
 
         query = "SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_REQUESTS r"
 
@@ -26,9 +30,36 @@ class MetaDataService:
         cur.execute(None)
         cur.arraysize = 100
         result = cur.fetchall()
+        list = []
         for r in result:
-            print r
+            list.append(r)
         cur.close()
+        return list
+
+    def find_meta_data_by_dataset_names(self):
+        """
+        Queries all xml meta data clobs by the names in the ArcGIS requests table
+        :return: Meta data (Dictionary)
+        """
+
+        query = "SELECT i.NAME, t.NAME, i.DOCUMENTATION " \
+                "FROM SDE.GDB_ITEMS_VW i LEFT JOIN SDE.GDB_ITEMTYPES t " \
+                "ON i.Type = t.UUID " \
+                "WHERE i.NAME in (SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_REQUESTS r)" \
+                "AND t.NAME in ('Feature Dataset') " \
+                "AND length(i.DOCUMENTATION) > 1 " \
+                "AND i.DOCUMENTATION IS NOT NULL "
+
+        cur = self.con.cursor()
+        cur.prepare(query)
+        cur.execute(None)
+        cur.arraysize = 100
+        result = cur.fetchall()
+        metas = {}
+        for r in result:
+            metas[r[0]] = r[2].read()
+        cur.close()
+        return metas
 
     def find_flagged_meta_data(self):
         """

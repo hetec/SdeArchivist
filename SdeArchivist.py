@@ -18,7 +18,10 @@ if __name__ == "__main__":
     ldap = LdapService.LdapService(props.ldap_config)
     meta_data_service = MetaDataService.MetaDataService(connection)
 
-    meta_data_service.find_all_requests()
+    name = ("HEBNER.alles")
+    meta_data_service.find_meta_data_by_dataset_names()
+
+    #meta_data_service.find_all_requests()
 
     # raw_meta = meta_data_service.find_flagged_meta_data()
     #
