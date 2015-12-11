@@ -1,6 +1,7 @@
 # -*- encoding utf-8 -*-
 import arcpy
 
+
 class XmlWorkspaceImporter:
 
     def __init__(self, properties):

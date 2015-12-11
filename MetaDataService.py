@@ -17,6 +17,19 @@ class MetaDataService:
         """
         self.con = connection
 
+    def find_all_requests(self):
+
+        query = "SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_REQUESTS r"
+
+        cur = self.con.cursor()
+        cur.prepare(query)
+        cur.execute(None)
+        cur.arraysize = 100
+        result = cur.fetchall()
+        for r in result:
+            print r
+        cur.close()
+
     def find_flagged_meta_data(self):
         """
         Finds alle meta data in the defined oracle database which are marked by a flag
