@@ -18,8 +18,16 @@ if __name__ == "__main__":
     ldap = LdapService.LdapService(props.ldap_config)
     meta_data_service = MetaDataService.MetaDataService(connection)
 
-    name = ("HEBNER.alles")
+    name = ("SDE.alles")
     meta_data_service.find_meta_data_by_dataset_names()
+
+    print "ADD PROCESS:"
+
+    id = meta_data_service.add_process(name, "TEST", "ORGNAME")
+
+    print "CHANGE STATE"
+
+    meta_data_service.update_state(id, "IN PROGRESS")
 
     #meta_data_service.find_all_requests()
 

@@ -1,6 +1,7 @@
 # -*- encoding utf-8 -*-
 import cx_Oracle
 import OracleConnection
+import datetime
 
 
 class MetaDataService:
@@ -60,6 +61,55 @@ class MetaDataService:
             metas[r[0]] = r[2].read()
         cur.close()
         return metas
+
+    def add_process(self, dataset_name, remarks, org_name):
+
+        try:
+
+            getId = "SELECT r.OBJECTID FROM SDE.ARCHIVE_REQUESTS r WHERE r.NAME_OF_DATASET = :data_name"
+
+            cur1 = self.con.cursor()
+            cur1.prepare(getId)
+            cur1.execute(None, {'data_name': dataset_name})
+            result = cur1.fetchall()
+
+            for r in result:
+                print "ID: " + str(r[0])
+                dataset_id = r[0]
+
+            dataset_id = 1
+
+            query = "INSERT INTO " \
+                    "SDE.ARCHIVE_CONTENT " \
+                    "(OBJECTID, NAME_OF_DATASET, DATE_OF_ARCHIVING, REMARKS, NAME_OF_DATASET_ORIGINAL) " \
+                    "VALUES (:data_id, :data_name, :req_date, :remarks, :org)"
+
+            cur2 = self.con.cursor()
+            cur_date = datetime.date.today()
+            cur2.prepare(query)
+            cur2.execute(None, {'data_id': dataset_id, 'data_name': dataset_name, 'req_date': cur_date, 'remarks': remarks, 'org': org_name})
+            self.con.commit()
+            return dataset_id
+        except Exception as e:
+            raise Exception(e)
+            self.con.rollback()
+        finally:
+            cur1.close()
+            cur2.close()
+
+    def update_state(self, id, state):
+
+        try:
+            query = "UPDATE SDE.ARCHIVE_CONTENT c SET c.REMARKS = :state WHERE c.OBJECTID = :data_id"
+
+            cur = self.con.cursor()
+            cur.prepare(query)
+            cur.execute(None, {'state':state, 'data_id':id})
+            self.con.commit()
+        except:
+            self.con.rollback()
+        finally:
+            cur.close()
 
     def find_flagged_meta_data(self):
         """
