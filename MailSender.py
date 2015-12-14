@@ -12,7 +12,6 @@ class MailSender:
 
     def __init__(self, properties):
         self.__props = properties
-        print self.__props["port"]
         #only ascii for the server and port
         self.__smtpObj = smtplib.SMTP(str(self.__props["smtp_server"]), str(self.__props["port"]))
         self.__smtpObj.starttls()
@@ -21,10 +20,14 @@ class MailSender:
         self.__smtpObj.login(self.__props["username"], self.__props["password"])
         tos_addr = [to]
         tos_addr.extend(self.__props["additional_recipients"])
-        print tos_addr
-        print type(tos_addr)
-        self.__smtpObj.sendmail("patrick.hebner@ufz.de", tos_addr, self.__build_msg(tos_addr, content))
+        self.__smtpObj.sendmail(self.__props["from"], tos_addr, self.__build_msg(tos_addr, content))
         #self.__smtpObj.quit()
+
+    def send_to_admin(self, content):
+        self.__smtpObj.login(self.__props["username"], self.__props["password"])
+        tos_addr = []
+        tos_addr.extend(self.__props["additional_recipients"])
+        self.__smtpObj.sendmail(self.__props["from"], tos_addr, self.__build_msg(tos_addr, content))
 
     def __build_msg(self, to, content):
         msg = multipart.MIMEMultipart()
@@ -43,4 +46,4 @@ class MailSender:
 if __name__ == "__main__":
     props = SdeArchivistProperties.SdeArchivistProperties("config/archivist_config.json").mail_config
     m = MailSender(props)
-    m.send("patrick.hebner@ufz.de", "TEST CONTENT")
+    m.send_to_admin("ADMIN TEST")
