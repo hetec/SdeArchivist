@@ -1,4 +1,4 @@
-
+# -*- encoding utf-8 -*-
 from xmlWorkspaceDocumentExportError import XMLWorkspaceDocumentExportError
 import os
 import arcpy

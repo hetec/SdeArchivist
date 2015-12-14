@@ -1,3 +1,6 @@
+# -*- encoding utf-8 -*-
+
+
 class XMLWorkspaceDocumentExportError(Exception):
     def __init__(self, value):
         self.value = value

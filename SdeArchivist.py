@@ -1,5 +1,4 @@
 # -*- encoding utf-8 -*-
-
 from OracleConnection import OracleConnection
 import MetaDataService
 import MetaDataValidator
@@ -11,6 +10,13 @@ import MailSender
 import SdeConnectionGenerator
 import xmlWorkspaceExporter
 import XmlWorkspaceImporter
+import xmlWorkspaceDocumentExportError
+import XmlImportException
+
+def handle_failure(identifier, error, message):
+    meta_data_service.delete_by_id(identifier)
+    meta_data_service.update_state(identifier, message)
+    print str(error)
 
 if __name__ == "__main__":
 
@@ -38,9 +44,15 @@ if __name__ == "__main__":
             #meta_data_service.update_state(pid, "META DATA VALID")
             print "OK!"
             print "\n4) EXPORT OF: " + xml + "\n"
-            xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf).export(xml)
+            try:
+                xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf).export(xml)
+            except xmlWorkspaceDocumentExportError as e:
+                handle_failure(pid, e, "FAILED, EXPORT ERROR")
             print "\n5) IMPORT OF: " + xml + "\n"
-            XmlWorkspaceImporter.XmlWorkspaceImporter(props.sde_config).archive(str(xml) + ".xml")
+            try:
+                XmlWorkspaceImporter.XmlWorkspaceImporter(props.sde_config).archive(str(xml) + ".xml")
+            except XmlImportException as e:
+                handle_failure(pid, e, "FAILED, IMPORT ERROR")
             meta_data_service.delete_by_id(pid)
             meta_data_service.update_state(pid, "FINISHED")
         else:
