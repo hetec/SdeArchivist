@@ -10,6 +10,7 @@ import MetaDataRenderer
 import MailSender
 import SdeConnectionGenerator
 import xmlWorkspaceExporter
+import XmlWorkspaceImporter
 
 if __name__ == "__main__":
 
@@ -34,10 +35,14 @@ if __name__ == "__main__":
         validated_meta = MetaData.MetaData()
         MetaDataValidator.MetaDataValidator(raw_meta[xml], required_tags).validate(validated_meta)
         if validated_meta.is_valid():
-            meta_data_service.update_state(pid, "META DATA OK")
+            #meta_data_service.update_state(pid, "META DATA VALID")
             print "OK!"
             print "\n4) EXPORT OF: " + xml + "\n"
             xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf).export(xml)
+            print "\n5) IMPORT OF: " + xml + "\n"
+            XmlWorkspaceImporter.XmlWorkspaceImporter(props.sde_config).archive(str(xml) + ".xml")
+            meta_data_service.delete_by_id(pid)
+            meta_data_service.update_state(pid, "FINISHED")
         else:
             meta_data_service.update_state(id, "INVALID META DATA")
             ms = MailSender.MailSender(props.mail_config)

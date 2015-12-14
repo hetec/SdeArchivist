@@ -46,8 +46,8 @@ class MetaDataService:
             query = "SELECT i.NAME, t.NAME, i.DOCUMENTATION " \
                     "FROM SDE.GDB_ITEMS_VW i LEFT JOIN SDE.GDB_ITEMTYPES t " \
                     "ON i.Type = t.UUID " \
-                    "WHERE i.NAME in (SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_ORDERS_EVW r)" \
-                    "AND t.NAME in ('Feature Dataset') " \
+                    "WHERE i.NAME IN (SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_ORDERS_EVW r)" \
+                    "AND t.NAME IN ('Feature Dataset') " \
                     "AND length(i.DOCUMENTATION) > 1 " \
                     "AND i.DOCUMENTATION IS NOT NULL "
 
@@ -61,7 +61,7 @@ class MetaDataService:
                 metas[r[0]] = r[2].read()
             return metas
         except cx_Oracle.DatabaseError as e:
-            raise DataException("Error while fetching all datasets: " + e)
+            raise DataException("Error while fetching all datasets: " + str(e))
         finally:
             cur.close()
 
@@ -84,8 +84,8 @@ class MetaDataService:
         except cx_Oracle.DatabaseError as e:
             self.con.rollback()
             raise DataException("Exception while fetching the id for "
-                                + dataset_name
-                                + " from SDE.ARCHIVE_ORDERS_EVW:  \n" + e)
+                                + str(dataset_name)
+                                + " from SDE.ARCHIVE_ORDERS_EVW:  \n" + str(e))
         finally:
             cur.close()
 
@@ -101,12 +101,13 @@ class MetaDataService:
             cur = self.con.cursor()
             cur_date = datetime.date.today()
             cur.prepare(query)
-            cur.execute(None, {'data_id': did, 'data_name': dataset_name, 'req_date': cur_date, 'remarks': remarks, 'org': org_name})
+            cur.execute(None, {'data_id': did, 'data_name': dataset_name, 'req_date': cur_date, 'remarks': remarks,
+                               'org': org_name})
             self.con.commit()
             return did
         except cx_Oracle.DatabaseError as e:
             self.con.rollback()
-            raise DataException("Exception while adding a process to SDE.ARCHIVE_CONTENT_EVW: \n" + e)
+            raise DataException("Exception while adding a process to SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
         finally:
             cur.close()
 
@@ -114,14 +115,29 @@ class MetaDataService:
 
         try:
             query = "UPDATE SDE.ARCHIVE_CONTENT_EVW c SET c.REMARKS = :state WHERE c.OBJECTID = :data_id"
-
             cur = self.con.cursor()
             cur.prepare(query)
             cur.execute(None, {'state': state, 'data_id': data_id})
             self.con.commit()
         except cx_Oracle.DatabaseError as e:
             self.con.rollback()
-            raise DataException ("Exception while updating the state column of SDE.ARCHIVE_CONTENT_EVW: \n" + e)
+            raise DataException("Exception while updating the state column of SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
+        finally:
+            cur.close()
+
+    def delete_by_id(self, data_id):
+        try:
+            query = "DELETE FROM SDE.ARCHIVE_ORDERS_EVW WHERE OBJECTID = :data_id"
+            cur = self.con.cursor()
+            cur.prepare(query)
+            cur.execute(None, {'data_id': data_id})
+            self.con.commit()
+
+        except cx_Oracle.DatabaseError as e:
+            self.con.rollback()
+            raise DataException("Exception while deleteing the id "
+                                + str(data_id)
+                                + " column of SDE.ARCHIVE_ORDERS_EVW: \n" + e)
         finally:
             cur.close()
 
@@ -131,16 +147,16 @@ class MetaDataService:
 
         :return: Meta data as dictionary {name : meta data xml string}
         """
-        query = "select i.NAME, t.NAME, i.DOCUMENTATION from SDE.GDB_ITEMS_VW i left join SDE.GDB_ITEMTYPES t " \
-                "on i.Type = t.UUID " \
-                "where DBMS_LOB.instr(i.DOCUMENTATION, :flag) > 0 " \
-                "and t.NAME = :name " \
-                "and length(i.DOCUMENTATION) > 1 " \
-                "and i.DOCUMENTATION is not null"
+        query = "SELECT i.NAME, t.NAME, i.DOCUMENTATION FROM SDE.GDB_ITEMS_VW i LEFT JOIN SDE.GDB_ITEMTYPES t " \
+                "ON i.Type = t.UUID " \
+                "WHERE DBMS_LOB.instr(i.DOCUMENTATION, :flag) > 0 " \
+                "AND t.NAME = :name " \
+                "AND length(i.DOCUMENTATION) > 1 " \
+                "AND i.DOCUMENTATION IS NOT NULL"
 
         cur = self.con.cursor()
         cur.prepare(query)
-        cur.execute(None, {'name':'Feature Dataset','flag':'DRP=true'})
+        cur.execute(None, {'name': 'Feature Dataset', 'flag': 'DRP=true'})
         cur.arraysize = 100
         result = cur.fetchall()
         metas = {}
@@ -148,4 +164,3 @@ class MetaDataService:
             metas[r[0]] = r[2].read()
         cur.close()
         return metas
-
