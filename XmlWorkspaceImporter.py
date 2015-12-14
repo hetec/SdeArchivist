@@ -1,5 +1,6 @@
 # -*- encoding utf-8 -*-
 import arcpy
+from XmlImportException import XmlImportException
 
 
 class XmlWorkspaceImporter:
@@ -10,8 +11,12 @@ class XmlWorkspaceImporter:
         self.__data = self.__base_path + "/buffer/"
 
     def archive(self, data_name):
-        arcpy.ImportXMLWorkspaceDocument_management(
-            self.__sde_file,
-            self.__data + data_name,
-            "DATA"
-            )
+        try:
+            arcpy.ImportXMLWorkspaceDocument_management(
+                self.__sde_file,
+                self.__data + data_name,
+                "DATA"
+                )
+        except Exception as e:
+            raise XmlImportException("Exception while importing the xml file to the read only schema: " +
+                                     str(e))
