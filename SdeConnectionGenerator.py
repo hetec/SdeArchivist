@@ -9,14 +9,15 @@ class SdeConnectionGenerator:
     Creates a new SDE connection file to be able to connect to the SDE database
     """
 
-    def __init__(self, properties):
+    def __init__(self, properties, connection_name):
         """
         Creates a new SdeConnectionGenerator instance of a set of properties
         :param properties: Properties which are necessary to build a SDE file (Dictionary)
+        :param connection_name: Name of the connection (String)
         :return: new SdeConnectionGenerator instance
         """
         self.__basePath = properties["connection_file_path"] + "/config"
-        self.__sdeFileName = "connection.sde"
+        self.__sdeFileName = str(connection_name) + ".sde"
         self.__sdeFile = self.__basePath + "/" + self.__sdeFileName
         self.__database = properties["database_type"]
         self.__instance = properties["instance_name"]

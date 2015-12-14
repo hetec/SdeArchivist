@@ -34,14 +34,14 @@ class ExistenceValidator():
         path = os.path.join(os.path.abspath("config"), file_name)
         return os.path.exists(path)
 
-    def imported_sde_data_exists(self, file_name):
+    def imported_sde_data_exists(self, connection_name, file_name):
         """
         Checks if a given file exists in the sde database
         :param file_name: The file to verify (String)
         :return: (Boolean)
         """
-        if self.config_file_exists("connection.sde"):
-            path = os.path.abspath("config/connection.sde/")
+        if self.config_file_exists(connection_name + ".sde"):
+            path = os.path.abspath("config/" + connection_name + ".sde/")
             arcpy.env.workspace = path
             return arcpy.Exists(file_name)
         else:
@@ -50,5 +50,5 @@ class ExistenceValidator():
 
 if __name__ == "__main__":
     validator = ExistenceValidator()
-    print(validator.directory_exists("config"))
+    print(validator.imported_sde_data_exists("sde", "SDE.alles"))
 

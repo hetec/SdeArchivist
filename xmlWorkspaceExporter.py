@@ -9,13 +9,15 @@ class XmlWorkspaceExporter:
     Exports the specified SDE data to an xml file
     """
 
-    def __init__(self, properties):
+    def __init__(self, properties, connection_name):
         """
         Creates a new XmlWorkspaceExporter instance
         :param properties: Properties which must provide the 'connection_file_path'
+        :param connection_name: Name of the connection (String)
         :return: new XmlWorkspaceExporter instance
         """
         self.__base_path = properties["connection_file_path"]
+        self.__connection_name = connection_name
 
     def export(self, data):
         """
@@ -25,7 +27,7 @@ class XmlWorkspaceExporter:
         :param data: The name of the SDE DataSet. Must be exportable as xmlWorkspaceDocument (String)
         :return:
         """
-        input_file = self.__base_path + "/config/connection.sde"
+        input_file = self.__base_path + "/config/sde.sde"
         location = self.__base_path + "/buffer"
         input_file = input_file + "/" + data
         data = data.strip(" \t")

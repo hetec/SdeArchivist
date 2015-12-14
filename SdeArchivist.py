@@ -46,7 +46,9 @@ if __name__ == "__main__":
     connection = OracleConnection(props.database_config).connection()
     ldap = LdapService.LdapService(props.ldap_config)
     sdeConf = props.sde_config
-    sdeCon = SdeConnectionGenerator.SdeConnectionGenerator(sdeConf).connect()
+    archive_conf = props.sdearchive_config
+    sdeCon = SdeConnectionGenerator.SdeConnectionGenerator(sdeConf, "sde").connect()
+    archive_con = SdeConnectionGenerator.SdeConnectionGenerator(archive_conf, "sdearchive").connect()
     required_tags = props.tag_config
     meta_data_service = MetaDataService.MetaDataService(connection)
 
@@ -77,7 +79,7 @@ if __name__ == "__main__":
             print "\n4) EXPORT OF: " + xml + "\n"
 
             try:
-                xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf).export(xml)
+                xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf, "sde").export(xml)
             except xmlWorkspaceDocumentExportError as e:
                 handle_process_failure(pid, e, "FAILED, EXPORT ERROR", ms)
                 continue
@@ -85,7 +87,7 @@ if __name__ == "__main__":
             if existenceValidator.buffered_xml_exists(str(xml) + ".xml"):
                 try:
                     print "\n5) IMPORT OF: " + xml + "\n"
-                    XmlWorkspaceImporter.XmlWorkspaceImporter(props.sde_config).archive(str(xml) + ".xml")
+                    XmlWorkspaceImporter.XmlWorkspaceImporter(archive_conf, "sdearchive").archive(str(xml) + ".xml")
                 except XmlImportException as e:
                     handle_process_failure(pid, e, "FAILED, IMPORT ERROR", ms)
                 meta_data_service.delete_by_id(pid)
@@ -95,8 +97,8 @@ if __name__ == "__main__":
                                        "FAILED, EXPORT ERROR", ms)
                 continue
 
-            if not existenceValidator.imported_sde_data_exists("SDE." + xml.split(".")[1]):
-                handle_process_failure(pid, "The data: " + str(xml) + " does not exist in the sde after the import!",
+            if not existenceValidator.imported_sde_data_exists("sdearchive", "SDE." + xml.split(".")[1]):
+                handle_process_failure(pid, "The data: " + str(xml) + " does not exist in the sdearchive after the import!",
                                        "FAILED, IMPORT ERROR", ms)
                 continue
         else:
