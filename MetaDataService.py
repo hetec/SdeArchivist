@@ -1,7 +1,7 @@
 # -*- encoding utf-8 -*-
-import cx_Oracle
-import OracleConnection
 import datetime
+import cx_Oracle
+from DataException import DataException
 
 
 class MetaDataService:
@@ -24,7 +24,7 @@ class MetaDataService:
         :return: Names (List)
         """
 
-        query = "SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_REQUESTS r"
+        query = "SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_ORDERS_EVW r"
 
         cur = self.con.cursor()
         cur.prepare(query)
@@ -42,72 +42,86 @@ class MetaDataService:
         Queries all xml meta data clobs by the names in the ArcGIS requests table
         :return: Meta data (Dictionary)
         """
-
-        query = "SELECT i.NAME, t.NAME, i.DOCUMENTATION " \
-                "FROM SDE.GDB_ITEMS_VW i LEFT JOIN SDE.GDB_ITEMTYPES t " \
-                "ON i.Type = t.UUID " \
-                "WHERE i.NAME in (SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_REQUESTS r)" \
-                "AND t.NAME in ('Feature Dataset') " \
-                "AND length(i.DOCUMENTATION) > 1 " \
-                "AND i.DOCUMENTATION IS NOT NULL "
-
-        cur = self.con.cursor()
-        cur.prepare(query)
-        cur.execute(None)
-        cur.arraysize = 100
-        result = cur.fetchall()
-        metas = {}
-        for r in result:
-            metas[r[0]] = r[2].read()
-        cur.close()
-        return metas
-
-    def add_process(self, dataset_name, remarks, org_name):
-
         try:
-
-            getId = "SELECT r.OBJECTID FROM SDE.ARCHIVE_REQUESTS r WHERE r.NAME_OF_DATASET = :data_name"
-
-            cur1 = self.con.cursor()
-            cur1.prepare(getId)
-            cur1.execute(None, {'data_name': dataset_name})
-            result = cur1.fetchall()
-
-            for r in result:
-                print "ID: " + str(r[0])
-                dataset_id = r[0]
-
-            dataset_id = 1
-
-            query = "INSERT INTO " \
-                    "SDE.ARCHIVE_CONTENT " \
-                    "(OBJECTID, NAME_OF_DATASET, DATE_OF_ARCHIVING, REMARKS, NAME_OF_DATASET_ORIGINAL) " \
-                    "VALUES (:data_id, :data_name, :req_date, :remarks, :org)"
-
-            cur2 = self.con.cursor()
-            cur_date = datetime.date.today()
-            cur2.prepare(query)
-            cur2.execute(None, {'data_id': dataset_id, 'data_name': dataset_name, 'req_date': cur_date, 'remarks': remarks, 'org': org_name})
-            self.con.commit()
-            return dataset_id
-        except Exception as e:
-            raise Exception(e)
-            self.con.rollback()
-        finally:
-            cur1.close()
-            cur2.close()
-
-    def update_state(self, id, state):
-
-        try:
-            query = "UPDATE SDE.ARCHIVE_CONTENT c SET c.REMARKS = :state WHERE c.OBJECTID = :data_id"
+            query = "SELECT i.NAME, t.NAME, i.DOCUMENTATION " \
+                    "FROM SDE.GDB_ITEMS_VW i LEFT JOIN SDE.GDB_ITEMTYPES t " \
+                    "ON i.Type = t.UUID " \
+                    "WHERE i.NAME in (SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_ORDERS_EVW r)" \
+                    "AND t.NAME in ('Feature Dataset') " \
+                    "AND length(i.DOCUMENTATION) > 1 " \
+                    "AND i.DOCUMENTATION IS NOT NULL "
 
             cur = self.con.cursor()
             cur.prepare(query)
-            cur.execute(None, {'state':state, 'data_id':id})
-            self.con.commit()
-        except:
+            cur.execute(None)
+            cur.arraysize = 100
+            result = cur.fetchall()
+            metas = {}
+            for r in result:
+                metas[r[0]] = r[2].read()
+            return metas
+        except cx_Oracle.DatabaseError as e:
+            raise DataException("Error while fetching all datasets: " + e)
+        finally:
+            cur.close()
+
+    def find_id_by_name(self, dataset_name):
+        try:
+            getId = "SELECT r.OBJECTID FROM SDE.ARCHIVE_ORDERS_EVW r WHERE r.NAME_OF_DATASET = :data_name"
+            cur = self.con.cursor()
+            cur.prepare(getId)
+            cur.execute(None, {'data_name': dataset_name})
+            result = cur.fetchall()
+            if len(result) <= 0:
+                dataset_id = -1
+            else:
+                for r in result:
+                    dataset_id = r[0]
+                    break
+
+            return dataset_id
+
+        except cx_Oracle.DatabaseError as e:
             self.con.rollback()
+            raise DataException("Exception while fetching the id for "
+                                + dataset_name
+                                + " from SDE.ARCHIVE_ORDERS_EVW:  \n" + e)
+        finally:
+            cur.close()
+
+    def add_process(self, dataset_name, remarks, org_name):
+
+        did = self.find_id_by_name(dataset_name)
+
+        try:
+            query = "INSERT INTO " \
+                    "SDE.ARCHIVE_CONTENT_EVW " \
+                    "(OBJECTID, NAME_OF_DATASET, DATE_OF_ARCHIVING, REMARKS, NAME_OF_DATASET_ORIGINAL) " \
+                    "VALUES (:data_id, :data_name, :req_date, :remarks, :org)"
+            cur = self.con.cursor()
+            cur_date = datetime.date.today()
+            cur.prepare(query)
+            cur.execute(None, {'data_id': did, 'data_name': dataset_name, 'req_date': cur_date, 'remarks': remarks, 'org': org_name})
+            self.con.commit()
+            return did
+        except cx_Oracle.DatabaseError as e:
+            self.con.rollback()
+            raise DataException("Exception while adding a process to SDE.ARCHIVE_CONTENT_EVW: \n" + e)
+        finally:
+            cur.close()
+
+    def update_state(self, data_id, state):
+
+        try:
+            query = "UPDATE SDE.ARCHIVE_CONTENT_EVW c SET c.REMARKS = :state WHERE c.OBJECTID = :data_id"
+
+            cur = self.con.cursor()
+            cur.prepare(query)
+            cur.execute(None, {'state': state, 'data_id': data_id})
+            self.con.commit()
+        except cx_Oracle.DatabaseError as e:
+            self.con.rollback()
+            raise DataException ("Exception while updating the state column of SDE.ARCHIVE_CONTENT_EVW: \n" + e)
         finally:
             cur.close()
 
