@@ -26,6 +26,7 @@ class SdeArchivistProperties:
         self.ldap_config = {}
         self.mail_config = {}
         self.sde_config = {}
+        self.sdearchive_config = {}
         self.__read_config()
 
     def __read_config(self):
@@ -37,6 +38,7 @@ class SdeArchivistProperties:
             self.ldap_config = self.__extract_ldap_config(self.__config)
             self.mail_config = self.__extract_mail_config(self.__config)
             self.sde_config = self.__extract_sde_config(self.__config)
+            self.sdearchive_config = self.__extract_sdearchive_config(self.__config)
         finally:
             config_stream.close()
 
@@ -76,6 +78,14 @@ class SdeArchivistProperties:
                 return dct["sde_config"]
             else:
                 raise ValueError("Missing sde config entry "
+                                 "(connectionFilePath, database_type, instance_name, auth_method, username, password)")
+
+    def __extract_sdearchive_config(self, dct):
+        if "sdearchive_config" in dct:
+            if self.__validate_sdearchive_config(dct["sdearchive_config"]):
+                return dct["sdearchive_config"]
+            else:
+                raise ValueError("Missing sdearchive config entry "
                                  "(connectionFilePath, database_type, instance_name, auth_method, username, password)")
 
     def __validate_db_config(self, config):
@@ -128,6 +138,22 @@ class SdeArchivistProperties:
             valid_config = False
         return valid_config
 
+    def __validate_sdearchive_config(self, config):
+        valid_config = True
+        if "connection_file_path" not in config:
+            valid_config = False
+        if "database_type" not in config:
+            valid_config = False
+        if "instance_name" not in config:
+            valid_config = False
+        if "auth_method" not in config:
+            valid_config = False
+        if "username" not in config:
+            valid_config = False
+        if "password" not in config:
+            valid_config = False
+        return valid_config
+
     def __validate_ldap_config(self, config):
         valid_config = True
         if "server" not in config:
@@ -139,6 +165,6 @@ class SdeArchivistProperties:
 
 if __name__ == "__main__":
     props = SdeArchivistProperties("config/archivist_config.json")
-    for tag in props.tag_config:
-        print tag.tag_name()
-        print tag.is_empty()
+    for tag in props.sdearchive_config:
+        print tag
+        print props.sdearchive_config[tag]
