@@ -4,7 +4,9 @@
     "port" :  "",
     "service" :  "",
     "username" : "",
-    "password" : ""
+    "password" : "",
+    "request_table" : "",
+    "content_table" : ""
   },
   "sde_config" : {
     "connection_file_path" : "",

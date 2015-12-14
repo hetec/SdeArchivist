@@ -100,6 +100,10 @@ class SdeArchivistProperties:
             valid_config = False
         if "password" not in config:
             valid_config = False
+        if "request_table" not in config:
+            valid_config = False
+        if "content_table" not in config:
+            valid_config = False
         return valid_config
 
     def __validate_mail_config(self, config):
@@ -165,6 +169,6 @@ class SdeArchivistProperties:
 
 if __name__ == "__main__":
     props = SdeArchivistProperties("config/archivist_config.json")
-    for tag in props.sdearchive_config:
+    for tag in props.database_config:
         print tag
-        print props.sdearchive_config[tag]
+        print props.database_config[tag]
