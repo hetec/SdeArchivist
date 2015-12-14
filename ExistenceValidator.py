@@ -12,6 +12,10 @@ class ExistenceValidator():
     def __init__(self,):
         pass
 
+    def directory_exists(self, dir):
+        path = os.path.abspath(dir)
+        return os.path.exists(path)
+
     def buffered_xml_exists(self, file_name):
         """
         Checks if a given file exists in the buffer folder
@@ -46,5 +50,5 @@ class ExistenceValidator():
 
 if __name__ == "__main__":
     validator = ExistenceValidator()
-    print(validator.imported_sde_data_exists("SDE.alles"))
+    print(validator.directory_exists("config"))
 
