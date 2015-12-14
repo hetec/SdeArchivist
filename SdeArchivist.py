@@ -16,44 +16,33 @@ if __name__ == "__main__":
     props = SdeArchivistProperties.SdeArchivistProperties("config/archivist_config.json")
     connection = OracleConnection(props.database_config).connection()
     ldap = LdapService.LdapService(props.ldap_config)
+    sdeConf = props.sde_config
+    sdeCon = SdeConnectionGenerator.SdeConnectionGenerator(sdeConf).connect()
+    required_tags = props.tag_config
     meta_data_service = MetaDataService.MetaDataService(connection)
 
-    name = ("SDE.alles")
     meta_data_service.find_meta_data_by_dataset_names()
+    print "\n1) GET ALL ENTRIES OF THE REQUEST TABLE\n"
+    requests = meta_data_service.find_all_requests()
+    raw_meta = meta_data_service.find_meta_data_by_dataset_names()
 
-    print "ADD PROCESS:"
-
-    id = meta_data_service.add_process(name, "TEST", "ORGNAME")
-
-    print "CHANGE STATE"
-
-    meta_data_service.update_state(id, "IN PROGRESS")
-
-    #meta_data_service.find_all_requests()
-
-    # raw_meta = meta_data_service.find_flagged_meta_data()
-    #
-    # sdeConf = props.sde_config
-    # print sdeConf
-    # sdeCon = SdeConnectionGenerator.SdeConnectionGenerator(sdeConf).connect()
-    # required_tags = props.tag_config
-    # print required_tags
-    # print required_tags
-
-
-
-    # for xml in raw_meta:
-    #     print "\n1) VALIDATION OF: " + xml + "\n"
-    #     validated_meta = MetaData.MetaData()
-    #     MetaDataValidator.MetaDataValidator(raw_meta[xml], required_tags).validate(validated_meta)
-    #     if validated_meta.is_valid():
-    #         print "OK!"
-    #         print "\n2) EXPORT OF: " + xml + "\n"
-    #         xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf).export(xml)
-    #     else:
-    #         ms = MailSender.MailSender(props.mail_config)
-    #         out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
-    #         #ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out)
-    #         print out
+    for xml in raw_meta:
+        print "\n2) ADD TO CONTENTS TABLE: " + xml + "\n"
+        pid = meta_data_service.add_process(xml, "STARTED", xml)
+        print("TYPE of pid: " + str(type(pid)))
+        print "\n3) VALIDATION OF: " + xml + "\n"
+        validated_meta = MetaData.MetaData()
+        MetaDataValidator.MetaDataValidator(raw_meta[xml], required_tags).validate(validated_meta)
+        if validated_meta.is_valid():
+            meta_data_service.update_state(pid, "META DATA OK")
+            print "OK!"
+            print "\n4) EXPORT OF: " + xml + "\n"
+            xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf).export(xml)
+        else:
+            meta_data_service.update_state(id, "INVALID META DATA")
+            ms = MailSender.MailSender(props.mail_config)
+            out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
+            #ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out)
+            print out
 
 
