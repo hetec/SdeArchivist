@@ -39,12 +39,12 @@ class ExistenceValidator():
         if self.config_file_exists("connection.sde"):
             path = os.path.abspath("config/connection.sde/")
             arcpy.env.workspace = path
-            print(arcpy.Exists(file_name))
+            return arcpy.Exists(file_name)
         else:
             raise ExistenceException("Missing connection file in the config folder")
 
 
 if __name__ == "__main__":
     validator = ExistenceValidator()
-    validator.imported_sde_data_exists("SDE.alles")
+    print(validator.imported_sde_data_exists("SDE.alles"))
 

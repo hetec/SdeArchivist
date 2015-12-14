@@ -67,6 +67,11 @@ if __name__ == "__main__":
             else:
                 handle_failure(pid, "The workspace xml " + str(xml) + " does not exist!", "FAILED, EXPORT ERROR", ms)
                 continue
+
+            if not existenceValidator.imported_sde_data_exists("SDE." + xml.split(".")[1]):
+                handle_failure(pid, "The data: " + str(xml) + " does not exist in the sde after the import!",
+                               "FAILED, IMPORT ERROR", ms)
+                continue
         else:
             meta_data_service.update_state(id, "INVALID META DATA")
 
