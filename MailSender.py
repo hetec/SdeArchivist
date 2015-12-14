@@ -24,7 +24,7 @@ class MailSender:
         print tos_addr
         print type(tos_addr)
         self.__smtpObj.sendmail("patrick.hebner@ufz.de", tos_addr, self.__build_msg(tos_addr, content))
-        self.__smtpObj.quit()
+        #self.__smtpObj.quit()
 
     def __build_msg(self, to, content):
         msg = multipart.MIMEMultipart()
