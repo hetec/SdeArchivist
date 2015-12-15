@@ -54,56 +54,64 @@ if __name__ == "__main__":
 
     print "\n1) GET ALL ENTRIES OF THE REQUEST TABLE\n"
 
+    raw_meta = {}
+
     try:
         raw_meta = meta_data_service.find_meta_data_by_dataset_names()
     except DataException as e:
+        raw_meta = {}
         inform_admin("Exception while fetching the meta data for the registered datasets: \n" +
                      e, ms)
 
-    for xml in raw_meta:
-        print "\n2) ADD TO CONTENTS TABLE: " + xml + "\n"
-        pid = -1
-        try:
-            pid = meta_data_service.add_process(xml, "STARTED", xml)
-        except DataException as e:
-            inform_admin(e, ms)
-            handle_process_failure(pid, e, "FAILED, INTERNAL ERROR", ms)
-            continue
-
-        print "\n3) VALIDATION OF: " + xml + "\n"
-        validated_meta = MetaData.MetaData()
-        MetaDataValidator.MetaDataValidator(raw_meta[xml], required_tags).validate(validated_meta)
-        if validated_meta.is_valid():
-            # meta_data_service.update_state(pid, "META DATA VALID")
-            print "OK!"
-            print "\n4) EXPORT OF: " + xml + "\n"
-
+    if len(raw_meta) > 0:
+        for xml in raw_meta:
+            print "\n2) ADD TO CONTENTS TABLE: " + xml + "\n"
+            pid = -1
             try:
-                xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf, "sde").export(xml)
-            except xmlWorkspaceDocumentExportError as e:
-                handle_process_failure(pid, e, "FAILED, EXPORT ERROR", ms)
+                pid = meta_data_service.add_process(xml, "STARTED", xml)
+            except DataException as e:
+                inform_admin(e, ms)
+                handle_process_failure(pid, e, "FAILED, INTERNAL ERROR", ms)
                 continue
 
-            if existenceValidator.buffered_xml_exists(str(xml) + ".xml"):
+            print "\n3) VALIDATION OF: " + xml + "\n"
+            validated_meta = MetaData.MetaData()
+            MetaDataValidator.MetaDataValidator(raw_meta[xml], required_tags).validate(validated_meta)
+            if validated_meta.is_valid():
+                # meta_data_service.update_state(pid, "META DATA VALID")
+                print "OK!"
+                print "\n4) EXPORT OF: " + xml + "\n"
+
                 try:
-                    print "\n5) IMPORT OF: " + xml + "\n"
-                    XmlWorkspaceImporter.XmlWorkspaceImporter(archive_conf, "sdearchive").archive(str(xml) + ".xml")
-                except XmlImportException as e:
-                    handle_process_failure(pid, e, "FAILED, IMPORT ERROR", ms)
-                meta_data_service.delete_by_id(pid)
-                meta_data_service.update_state(pid, "FINISHED")
+                    xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf, "sde").export(xml)
+                except xmlWorkspaceDocumentExportError as e:
+                    handle_process_failure(pid, e, "FAILED, EXPORT ERROR", ms)
+                    continue
+
+                if existenceValidator.buffered_xml_exists(str(xml) + ".xml"):
+                    try:
+                        print "\n5) IMPORT OF: " + xml + "\n"
+                        XmlWorkspaceImporter.XmlWorkspaceImporter(archive_conf, "sdearchive").archive(str(xml) + ".xml")
+                    except XmlImportException as e:
+                        handle_process_failure(pid, e, "FAILED, IMPORT ERROR", ms)
+                    meta_data_service.delete_by_id(pid)
+                    meta_data_service.update_state(pid, "FINISHED")
+                else:
+                    handle_process_failure(pid, "The workspace xml " + str(xml) + " does not exist!",
+                                           "FAILED, EXPORT ERROR", ms)
+                    continue
+
+                if not existenceValidator.imported_sde_data_exists("sdearchive", "SDE." + xml.split(".")[1]):
+                    handle_process_failure(pid, "The data: " + str(xml) +
+                                           " does not exist in the sdearchive after the import!",
+                                           "FAILED, IMPORT ERROR", ms)
+                    continue
             else:
-                handle_process_failure(pid, "The workspace xml " + str(xml) + " does not exist!",
-                                       "FAILED, EXPORT ERROR", ms)
-                continue
+                meta_data_service.update_state(id, "INVALID META DATA")
 
-            if not existenceValidator.imported_sde_data_exists("sdearchive", "SDE." + xml.split(".")[1]):
-                handle_process_failure(pid, "The data: " + str(xml) + " does not exist in the sdearchive after the import!",
-                                       "FAILED, IMPORT ERROR", ms)
-                continue
-        else:
-            meta_data_service.update_state(id, "INVALID META DATA")
-
-            out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
-            # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out)
-            print out
+                out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
+                # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out)
+                print out
+    else:
+        #Logging
+        print "No meta data available"
