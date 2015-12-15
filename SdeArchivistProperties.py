@@ -2,6 +2,7 @@
 import io
 import json
 import RequiredTag
+import logging
 
 
 class SdeArchivistProperties:
@@ -27,6 +28,7 @@ class SdeArchivistProperties:
         self.mail_config = {}
         self.sde_config = {}
         self.sdearchive_config = {}
+        self.ldap_config = {}
         self.__read_config()
 
     def __read_config(self):
@@ -39,6 +41,7 @@ class SdeArchivistProperties:
             self.mail_config = self.__extract_mail_config(self.__config)
             self.sde_config = self.__extract_sde_config(self.__config)
             self.sdearchive_config = self.__extract_sdearchive_config(self.__config)
+            self.log_config = self.__extract_log_config(self.__config)
         finally:
             config_stream.close()
 
@@ -87,6 +90,15 @@ class SdeArchivistProperties:
             else:
                 raise ValueError("Missing sdearchive config entry "
                                  "(connectionFilePath, database_type, instance_name, auth_method, username, password)")
+
+    def __extract_log_config(self, dct):
+        if "log_config" in dct:
+            if self.__validate_log_config(dct["log_config"]):
+                self.__check_log_level(dct["log_config"])
+                return dct["log_config"]
+            else:
+                raise ValueError("Missing log config entry "
+                                 "(level, file, log_file_size (bytes), log_file_count (int))")
 
     def __validate_db_config(self, config):
         valid_config = True
@@ -165,6 +177,33 @@ class SdeArchivistProperties:
         if "dn" not in config:
             valid_config = False
         return valid_config
+
+    def __validate_log_config(self, config):
+        valid_config = True
+        if "level" not in config:
+            valid_config = False
+        if "file" not in config:
+            valid_config = False
+        if "log_file_size" not in config:
+            valid_config = False
+        if "log_file_count" not in config:
+            valid_config = False
+        return valid_config
+
+    def __check_log_level(self, config):
+        l = str(config["level"]).lower()
+        if l == "debug":
+            config["level"] = logging.DEBUG
+        elif l == "info":
+            config["level"] = logging.INFO
+        elif l == "warn":
+            config["level"] = logging.WARNING
+        elif l == "error":
+            config["level"] = logging.ERROR
+        elif l == "fatal":
+            config["level"] = logging.FATAL
+        else:
+            raise ValueError("No valid log level! Try debug, info, warn, error or fatal")
 
 
 if __name__ == "__main__":

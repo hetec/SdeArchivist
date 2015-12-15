@@ -38,6 +38,12 @@
     "subject" : "",
     "failure_message" : ""
   },
+  "log_config" : {
+    "level" : "",
+    "file" : "",
+    "log_file_size" : 4000,
+    "log_file_count" : 3
+  },
   "tag_config" : {
     "required" : [
       {
