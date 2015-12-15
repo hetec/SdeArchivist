@@ -14,6 +14,7 @@ import xmlWorkspaceDocumentExportError
 import XmlImportException
 import ExistenceValidator
 import DataException
+import ArchivistLogger
 
 
 def handle_process_failure(identifier, error, message, mailSender):
@@ -53,7 +54,14 @@ if __name__ == "__main__":
     check_project_structure(existenceValidator)
 
     props = SdeArchivistProperties.SdeArchivistProperties("config/archivist_config.json")
+
+    console_logger = ArchivistLogger.ArchivistLogger(props.log_config).get_console_logger()
+    file_logger = ArchivistLogger.ArchivistLogger(props.log_config).get_file_logger()
+
     ms = MailSender.MailSender(props.mail_config)
+    ms.set_console_logger(console_logger)
+    ms.set_file_logger(file_logger)
+
     connection = OracleConnection(props.database_config).connection()
     ldap = LdapService.LdapService(props.ldap_config)
     sdeConf = props.sde_config
@@ -94,7 +102,7 @@ if __name__ == "__main__":
 
                 try:
                     xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf, "sde").export(xml)
-                except xmlWorkspaceDocumentExportError as e:
+                except Exception as e:
                     handle_process_failure(pid, e, "FAILED, EXPORT ERROR", ms)
                     continue
 
@@ -119,6 +127,8 @@ if __name__ == "__main__":
                                            " does not exist in the sdearchive after the import!",
                                            "FAILED, IMPORT ERROR", ms)
                     continue
+                else:
+                    ms.send_to_admin("Success")
             else:
                 try:
                     meta_data_service.update_state(id, "INVALID META DATA")
