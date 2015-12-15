@@ -17,9 +17,20 @@ import DataException
 
 
 def handle_process_failure(identifier, error, message, mailSender):
-    meta_data_service.delete_by_id(identifier)
-    meta_data_service.update_state(identifier, message)
+    try:
+        meta_data_service.delete_by_id(identifier)
+        meta_data_service.update_state(identifier, message)
+    except DataException as e:
+        inform_admin("Handling the exception (element id = " +
+                     identifier +
+                     "): \n" +
+                     str(error) +
+                     " raises also a exception: \n" + str(e) +
+                     " \n"
+                     "Maybe there is a problem with the database connection or the queried tables.")
+
     mailSender.send("patrick.hebner@ufz.de", str(error))
+
     print str(error)
 
 
@@ -78,7 +89,6 @@ if __name__ == "__main__":
             validated_meta = MetaData.MetaData()
             MetaDataValidator.MetaDataValidator(raw_meta[xml], required_tags).validate(validated_meta)
             if validated_meta.is_valid():
-                # meta_data_service.update_state(pid, "META DATA VALID")
                 print "OK!"
                 print "\n4) EXPORT OF: " + xml + "\n"
 
@@ -94,8 +104,11 @@ if __name__ == "__main__":
                         XmlWorkspaceImporter.XmlWorkspaceImporter(archive_conf, "sdearchive").archive(str(xml) + ".xml")
                     except XmlImportException as e:
                         handle_process_failure(pid, e, "FAILED, IMPORT ERROR", ms)
-                    meta_data_service.delete_by_id(pid)
-                    meta_data_service.update_state(pid, "FINISHED")
+                    try:
+                        meta_data_service.delete_by_id(pid)
+                        meta_data_service.update_state(pid, "FINISHED")
+                    except DataException as e:
+                        handle_process_failure(pid, e, "CORRUPT (NOT ABLE TO SET STATE)")
                 else:
                     handle_process_failure(pid, "The workspace xml " + str(xml) + " does not exist!",
                                            "FAILED, EXPORT ERROR", ms)
@@ -107,11 +120,13 @@ if __name__ == "__main__":
                                            "FAILED, IMPORT ERROR", ms)
                     continue
             else:
-                meta_data_service.update_state(id, "INVALID META DATA")
-
+                try:
+                    meta_data_service.update_state(id, "INVALID META DATA")
+                except DataException as e:
+                    handle_process_failure(pid, e, "CORRUPT (NOT ABLE TO SET STATE)")
                 out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
                 # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out)
                 print out
     else:
-        #Logging
+        # Logging
         print "No meta data available"
