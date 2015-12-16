@@ -65,12 +65,13 @@ class MetaDataService:
         finally:
             cur.close()
 
-    def find_id_by_name(self, dataset_name):
+    def find_max_id(self, dataset_name):
         try:
-            getId = "SELECT r.OBJECTID FROM SDE.ARCHIVE_ORDERS_EVW r WHERE r.NAME_OF_DATASET = :data_name"
+            #getId = "SELECT r.OBJECTID FROM SDE.ARCHIVE_ORDERS_EVW r WHERE r.NAME_OF_DATASET = :data_name"
+            getId = "SELECT MAX(c.OBJECTID) FROM ARCHIVE_CONTENT_EVW c"
             cur = self.con.cursor()
             cur.prepare(getId)
-            cur.execute(None, {'data_name': dataset_name})
+            cur.execute(None)
             result = cur.fetchall()
             if len(result) <= 0:
                 dataset_id = -1
@@ -79,7 +80,7 @@ class MetaDataService:
                     dataset_id = r[0]
                     break
 
-            return dataset_id
+            return (dataset_id + 1)
 
         except cx_Oracle.DatabaseError as e:
             self.con.rollback()
@@ -91,7 +92,7 @@ class MetaDataService:
 
     def add_process(self, dataset_name, remarks, org_name):
 
-        did = self.find_id_by_name(dataset_name)
+        did = self.find_max_id(dataset_name)
 
         try:
             query = "INSERT INTO " \
