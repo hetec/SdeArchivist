@@ -15,7 +15,7 @@ import XmlImportException
 import ExistenceValidator
 import DataException
 import ArchivistLogger
-
+import BufferCleaner
 
 def handle_process_failure(identifier, error, message, mailSender):
     try:
@@ -137,6 +137,10 @@ if __name__ == "__main__":
                 out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
                 # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out)
                 print out
+
+            BufferCleaner.BufferCleaner().clear_file(str(xml) + ".xml")
     else:
         # Logging
         print "No meta data available"
+
+    BufferCleaner.BufferCleaner().clear_all("buffer")
