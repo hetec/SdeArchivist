@@ -17,13 +17,13 @@ import DataException
 import ArchivistLogger
 import BufferCleaner
 
-def handle_process_failure(identifier, error, message, mailSender):
+def handle_process_failure(cont_id, req_id, error, message, mailSender):
     try:
-        meta_data_service.delete_by_id(identifier)
-        meta_data_service.update_state(identifier, message)
+        meta_data_service.delete_by_id(req_id)
+        meta_data_service.update_state(cont_id, message)
     except DataException as e:
         inform_admin("Handling the exception (element id = " +
-                     identifier +
+                     cont_id +
                      "): \n" +
                      str(error) +
                      " raises also a exception: \n" + str(e) +
@@ -85,12 +85,21 @@ if __name__ == "__main__":
     if len(raw_meta) > 0:
         for xml in raw_meta:
             print "\n2) ADD TO CONTENTS TABLE: " + xml + "\n"
-            pid = -1
+
+            request_table_id = -1
             try:
-                pid = meta_data_service.add_process(xml, "STARTED", xml)
+                request_table_id = meta_data_service.find_id_by_name(str(xml))
             except DataException as e:
                 inform_admin(e, ms)
-                handle_process_failure(pid, e, "FAILED, INTERNAL ERROR", ms)
+                handle_process_failure(-1, request_table_id, e, "FAILED, INTERNAL ERROR", ms)
+                continue
+
+            content_table_id = -1
+            try:
+                content_table_id = meta_data_service.add_process(xml, "STARTED", xml)
+            except DataException as e:
+                inform_admin(e, ms)
+                handle_process_failure(content_table_id, request_table_id, e, "FAILED, INTERNAL ERROR", ms)
                 continue
 
             print "\n3) VALIDATION OF: " + xml + "\n"
@@ -103,7 +112,7 @@ if __name__ == "__main__":
                 try:
                     xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf, "sde").export(xml)
                 except Exception as e:
-                    handle_process_failure(pid, e, "FAILED, EXPORT ERROR", ms)
+                    handle_process_failure(content_table_id, request_table_id, e, "FAILED, EXPORT ERROR", ms)
                     continue
 
                 if existenceValidator.buffered_xml_exists(str(xml) + ".xml"):
@@ -111,19 +120,19 @@ if __name__ == "__main__":
                         print "\n5) IMPORT OF: " + xml + "\n"
                         XmlWorkspaceImporter.XmlWorkspaceImporter(archive_conf, "sdearchive").archive(str(xml) + ".xml")
                     except XmlImportException as e:
-                        handle_process_failure(pid, e, "FAILED, IMPORT ERROR", ms)
+                        handle_process_failure(content_table_id, request_table_id, e, "FAILED, IMPORT ERROR", ms)
                     try:
-                        meta_data_service.delete_by_id(pid)
-                        meta_data_service.update_state(pid, "FINISHED")
+                        meta_data_service.delete_by_id(request_table_id)
+                        meta_data_service.update_state(content_table_id, "FINISHED")
                     except DataException as e:
-                        handle_process_failure(pid, e, "CORRUPT (NOT ABLE TO SET STATE)")
+                        handle_process_failure(content_table_id, request_table_id, e, "CORRUPT (NOT ABLE TO SET STATE)")
                 else:
-                    handle_process_failure(pid, "The workspace xml " + str(xml) + " does not exist!",
+                    handle_process_failure(content_table_id, request_table_id, "The workspace xml " + str(xml) + " does not exist!",
                                            "FAILED, EXPORT ERROR", ms)
                     continue
 
                 if not existenceValidator.imported_sde_data_exists("sdearchive", "SDE." + xml.split(".")[1]):
-                    handle_process_failure(pid, "The data: " + str(xml) +
+                    handle_process_failure(content_table_id, request_table_id, "The data: " + str(xml) +
                                            " does not exist in the sdearchive after the import!",
                                            "FAILED, IMPORT ERROR", ms)
                     continue
@@ -133,7 +142,7 @@ if __name__ == "__main__":
                 try:
                     meta_data_service.update_state(id, "INVALID META DATA")
                 except DataException as e:
-                    handle_process_failure(pid, e, "CORRUPT (NOT ABLE TO SET STATE)")
+                    handle_process_failure(content_table_id, request_table_id, e, "CORRUPT (NOT ABLE TO SET STATE)")
                 out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
                 # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out)
                 print out
