@@ -59,6 +59,10 @@ class ExistenceValidator():
             self.__f_logger.debug("Dir exists: " + str(arcpy.Exists(file_name)))
             return arcpy.Exists(file_name)
         else:
+            self.__c_logger.exception("EXCEPTION while checking the excistence of " + connection_name
+                                      + "Missing connection file in the config folder")
+            self.__f_logger.exception("EXCEPTION while checking the excistence of " + connection_name
+                                      + "Missing connection file in the config folder")
             raise ExistenceException("Missing connection file in the config folder")
 
 
