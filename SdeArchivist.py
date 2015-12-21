@@ -66,8 +66,18 @@ if __name__ == "__main__":
     ldap = LdapService.LdapService(props.ldap_config)
     sdeConf = props.sde_config
     archive_conf = props.sdearchive_config
-    sdeCon = SdeConnectionGenerator.SdeConnectionGenerator(sdeConf, "sde").connect()
-    archive_con = SdeConnectionGenerator.SdeConnectionGenerator(archive_conf, "sdearchive").connect()
+
+    #Todo: combine these generators
+    connection_generator_sde = SdeConnectionGenerator.SdeConnectionGenerator(sdeConf, "sde")
+    connection_generator_sde.set_console_logger(console_logger)
+    connection_generator_sde.set_file_logger(file_logger)
+    connection_generator_sdearchive = SdeConnectionGenerator.SdeConnectionGenerator(sdeConf, "sde")
+    connection_generator_sdearchive.set_file_logger(file_logger)
+    connection_generator_sdearchive.set_console_logger(console_logger)
+
+    sdeCon = connection_generator_sde.connect()
+    archive_con = connection_generator_sdearchive.connect()
+
     required_tags = props.tag_config
     meta_data_service = MetaDataService.MetaDataService(connection)
 

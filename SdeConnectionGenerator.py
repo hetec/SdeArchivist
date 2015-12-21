@@ -25,13 +25,20 @@ class SdeConnectionGenerator:
         self.__username = properties["username"]
         self.__password = properties["password"]
 
+    def set_console_logger(self, console_logger):
+            self.__c_logger = console_logger
+
+    def set_file_logger(self, file_logger):
+        self.__f_logger = file_logger
+
     def __check_existence_of_sde_file(self):
         if os.path.isfile(self.__sdeFile) and os.access(self.__sdeFile, os.R_OK):
             return 1
         else:
             return 0
-             
     def __create_new_sde_connection_file(self):
+        self.__c_logger.info("CREATE SDE FILE")
+        self.__f_logger.info("CREATE SDE FILE")
         arcpy.CreateDatabaseConnection_management(self.__basePath,
                                                   self.__sdeFileName,
                                                   self.__database,
@@ -48,10 +55,23 @@ class SdeConnectionGenerator:
         - If no connection file exists in /config a new one will be created
         - If a connection file exists in /config it will be reused
         """
+        self.__c_logger.info("SDE CONNECTION PROPERTIES: \n"
+                             + self.__sdeFile + "\n"
+                             + self.__database + "\n"
+                             + self.__instance + "\n"
+                             + self.__authMethod + "\n"
+                             + self.__username + "\n")
+        self.__f_logger.info("SDE CONNECTION PROPERTIES: \n"
+                             + self.__sdeFile + "\n"
+                             + self.__database + "\n"
+                             + self.__instance + "\n"
+                             + self.__authMethod + "\n"
+                             + self.__username + "\n")
+
         if self.__check_existence_of_sde_file():
-            print("File does already exist --> use existing one")
+            self.__c_logger.info("Sde file already exists")
+            self.__f_logger.info("Sde file already exists")
         else:
-            print "Create NEW sde file"
             try:
                 self.__create_new_sde_connection_file()
             except arcpy.ExecuteError:
@@ -60,4 +80,6 @@ class SdeConnectionGenerator:
                 m = m + " User: " + self.__username
                 m = m + " Password: " + self.__password
                 m += " Please check your configuration data and database connection."
+                self.__c_logger.info("EXCEPTION WHILE CREATING SDE FILE: " + str(m))
+                self.__f_logger.info("EXCEPTION WHILE CREATING SDE FILE: " + str(m))
                 raise SdeException(m)
