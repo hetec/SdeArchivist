@@ -80,6 +80,6 @@ class SdeConnectionGenerator:
                 m = m + " User: " + self.__username
                 m = m + " Password: " + self.__password
                 m += " Please check your configuration data and database connection."
-                self.__c_logger.info("EXCEPTION WHILE CREATING SDE FILE: " + str(m))
-                self.__f_logger.info("EXCEPTION WHILE CREATING SDE FILE: " + str(m))
+                self.__c_logger.exception("EXCEPTION WHILE CREATING SDE FILE: " + str(m))
+                self.__f_logger.exception("EXCEPTION WHILE CREATING SDE FILE: " + str(m))
                 raise SdeException(m)

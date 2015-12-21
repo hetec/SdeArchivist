@@ -70,8 +70,8 @@ class MetaDataService:
                 metas[r[0]] = r[2].read()
             return metas
         except cx_Oracle.DatabaseError as e:
-            self.__c_logger.info("EXCEPTION WHILE finding meta data by dataset name: " + str(e))
-            self.__f_logger.info("EXCEPTION WHILE finding meta data by dataset name: " + str(e))
+            self.__c_logger.exception("EXCEPTION WHILE finding meta data by dataset name: " + str(e))
+            self.__f_logger.exception("EXCEPTION WHILE finding meta data by dataset name: " + str(e))
             raise DataException("Error while fetching all datasets: " + str(e))
         finally:
             cur.close()
@@ -97,8 +97,8 @@ class MetaDataService:
 
         except cx_Oracle.DatabaseError as e:
             self.con.rollback()
-            self.__c_logger.info("EXCEPTION WHILE finding max id in content table: " + str(e))
-            self.__f_logger.info("EXCEPTION WHILE finding max id in content table: " + str(e))
+            self.__c_logger.exception("EXCEPTION WHILE finding max id in content table: " + str(e))
+            self.__f_logger.exception("EXCEPTION WHILE finding max id in content table: " + str(e))
             raise DataException("Exception while fetching max id in "
                                 + "SDE.ARCHIVE_ORDERS_EVW:  \n" + str(e))
         finally:
@@ -124,8 +124,8 @@ class MetaDataService:
 
         except cx_Oracle.DatabaseError as e:
             self.con.rollback()
-            self.__c_logger.info("EXCEPTION WHILE finding id by name: " + str(e))
-            self.__f_logger.info("EXCEPTION WHILE finding id by name: " + str(e))
+            self.__c_logger.exception("EXCEPTION WHILE finding id by name: " + str(e))
+            self.__f_logger.exception("EXCEPTION WHILE finding id by name: " + str(e))
             raise DataException("Exception while fetching id for "
                                 + dataset_name
                                 + " from SDE.ARCHIVE_ORDERS_EVW:  \n" + str(e))
@@ -151,8 +151,8 @@ class MetaDataService:
             return did
         except cx_Oracle.DatabaseError as e:
             self.con.rollback()
-            self.__c_logger.info("EXCEPTION WHILE adding process information to the content table: " + str(e))
-            self.__f_logger.info("EXCEPTION WHILE adding process information to the content table: " + str(e))
+            self.__c_logger.exception("EXCEPTION WHILE adding process information to the content table: " + str(e))
+            self.__f_logger.exception("EXCEPTION WHILE adding process information to the content table: " + str(e))
             raise DataException("Exception while adding a process to SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
         finally:
             cur.close()
@@ -168,8 +168,8 @@ class MetaDataService:
             self.con.commit()
         except cx_Oracle.DatabaseError as e:
             self.con.rollback()
-            self.__c_logger.info("EXCEPTION WHILE updating process information to the content table: " + str(e))
-            self.__f_logger.info("EXCEPTION WHILE updating process information to the content table: " + str(e))
+            self.__c_logger.exception("EXCEPTION WHILE updating process information to the content table: " + str(e))
+            self.__f_logger.exception("EXCEPTION WHILE updating process information to the content table: " + str(e))
             raise DataException("Exception while updating the state column of SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
         finally:
             cur.close()
@@ -186,8 +186,8 @@ class MetaDataService:
 
         except cx_Oracle.DatabaseError as e:
             self.con.rollback()
-            self.__c_logger.info("EXCEPTION WHILE deleting request from the request table: " + str(e))
-            self.__f_logger.info("EXCEPTION WHILE deleting request from the request table: " + str(e))
+            self.__c_logger.exception("EXCEPTION WHILE deleting request from the request table: " + str(e))
+            self.__f_logger.exception("EXCEPTION WHILE deleting request from the request table: " + str(e))
             raise DataException("Exception while deleteing the id "
                                 + str(data_id)
                                 + " column of SDE.ARCHIVE_ORDERS_EVW: \n" + e)

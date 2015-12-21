@@ -32,7 +32,7 @@ class XmlWorkspaceImporter:
                 "DATA"
                 )
         except Exception as e:
-            self.__c_logger.info("EXCEPTION WHILE IMPORTING SDE FILE FORM BUFFER: " + str(e))
-            self.__f_logger.info("EXCEPTION WHILE IMPORTING SDE FILE FORM BUFFER: " + str(e))
+            self.__c_logger.exception("EXCEPTION WHILE IMPORTING SDE FILE FORM BUFFER: " + str(e))
+            self.__f_logger.exception("EXCEPTION WHILE IMPORTING SDE FILE FORM BUFFER: " + str(e))
             raise XmlImportException("Exception while importing the xml file to the read only schema: " +
                                      str(e))
