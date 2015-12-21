@@ -47,13 +47,19 @@
   "tag_config" : {
     "required" : [
       {
-        "tag_name" : ""
+        "tag_name" : "keyword"
       },
       {
-        "tag_name" : "",
+        "tag_name" : "CharSetCd",
         "is_empty" : true,
-        "attributes" : []
+        "attributes" : ["value"]
+      },
+      {
+         "tag_name" : "dataIdInfo/dataLang/languageCode",
+         "is_empty" : true,
+         "attributes" : ["value"]
       }
+
     ]
   }
 }

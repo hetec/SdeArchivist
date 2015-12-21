@@ -47,7 +47,7 @@ class MetaDataService:
                     "FROM SDE.GDB_ITEMS_VW i LEFT JOIN SDE.GDB_ITEMTYPES t " \
                     "ON i.Type = t.UUID " \
                     "WHERE i.NAME IN (SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_ORDERS_EVW r)" \
-                    "AND t.NAME IN ('Feature Dataset') " \
+                    "AND t.NAME IN ('Feature Dataset', 'Raster Dataset', 'Table', 'Raster Catalog', 'Mosaic Dataset') " \
                     "AND length(i.DOCUMENTATION) > 1 " \
                     "AND i.DOCUMENTATION IS NOT NULL "
 
