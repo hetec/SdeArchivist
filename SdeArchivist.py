@@ -80,6 +80,8 @@ if __name__ == "__main__":
 
     required_tags = props.tag_config
     meta_data_service = MetaDataService.MetaDataService(connection)
+    meta_data_service.set_console_logger(console_logger)
+    meta_data_service.set_file_logger(file_logger)
 
     print "\n1) GET ALL ENTRIES OF THE REQUEST TABLE\n"
 
