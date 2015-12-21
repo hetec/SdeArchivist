@@ -131,7 +131,10 @@ if __name__ == "__main__":
                 if existenceValidator.buffered_xml_exists(str(xml) + ".xml"):
                     try:
                         print "\n5) IMPORT OF: " + xml + "\n"
-                        XmlWorkspaceImporter.XmlWorkspaceImporter(archive_conf, "sdearchive").archive(str(xml) + ".xml")
+                        importer = XmlWorkspaceImporter.XmlWorkspaceImporter(archive_conf, "sdearchive")
+                        importer.set_console_logger(console_logger)
+                        importer.set_file_logger(file_logger)
+                        importer.archive(str(xml) + ".xml")
                     except XmlImportException as e:
                         handle_process_failure(content_table_id, request_table_id, e, "FAILED, IMPORT ERROR", ms)
                     try:
