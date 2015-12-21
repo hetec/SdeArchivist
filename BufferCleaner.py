@@ -20,8 +20,8 @@ class BufferCleaner:
             for f in d[2]:
                 p = os.path.join(d[0],f)
                 os.remove(p)
-                self.__c_logger.info("REMOVE from buffer: " + str(p))
-                self.__f_logger.info("REMOVE from buffer: " + str(p))
+                self.__c_logger.debug("REMOVE from buffer: " + str(p))
+                self.__f_logger.debug("REMOVE from buffer: " + str(p))
             os.rmdir(d[0])
         os.mkdir(dir)
 
@@ -29,8 +29,8 @@ class BufferCleaner:
         print "remove file: " + file_name
         if os.access(os.path.join("buffer", file_name), os.F_OK):
             os.remove(os.path.join("buffer", file_name))
-            self.__c_logger.info("REMOVE from buffer: " + str(file_name))
-            self.__f_logger.info("REMOVE from buffer: " + str(file_name))
+            self.__c_logger.debug("REMOVE from buffer: " + str(file_name))
+            self.__f_logger.debug("REMOVE from buffer: " + str(file_name))
         else:
             print "no file"
 
