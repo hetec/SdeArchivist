@@ -21,32 +21,25 @@ class MetaDataValidator:
         self.__xml = xml
         self.__required_tags = required_tags
 
+    def set_console_logger(self, console_logger):
+        self.__c_logger = console_logger
+
+    def set_file_logger(self, file_logger):
+        self.__f_logger = file_logger
+
     def validate(self, meta_data):
         """
         Starts the validation process on the data specified on the creation of the validator
 
         :param meta_data: The meta data container which gets filled during the validation.
         """
-
+        self.__c_logger.info("START VALIDATION")
+        self.__f_logger.info("START VALIDATION")
         for tag in self.__required_tags:
             self.__find_xml_tag(self.__required_tags[tag],meta_data)
 
-    # def __validate_tag(self, found_tags, meta_data):
-    #     for tag in self.__required_tags:
-    #         exists = self.__validate_existence(tag, found_tags)
-    #         if exists is not None:
-    #             meta_data.add_meta_data(exists[0], exists[1])
-    #             if exists[1] is not "MISSING" and meta_data.is_valid() is True:
-    #                 print "IS OK? " + exists[1]
-    #                 meta_data.set_valid(False)
-    #         has_content = self.__validate_not_empty(tag, found_tags)
-    #         print has_content
-    #         if has_content is not None:
-    #             print "IS OK? " + has_content[1]
-    #             if has_content[1] is not "OK" and meta_data.is_valid() is True:
-    #                 meta_data.set_valid(False)
-    #             meta_data.add_meta_data(has_content[0], has_content[1])
-    #     return True
+        self.__c_logger.info("END VALIDATION")
+        self.__f_logger.info("END VALIDATION")
 
     def __validate_attribute(self, attribute_names, tag_name):
         attributes = tag_name.attrib
@@ -63,27 +56,41 @@ class MetaDataValidator:
                     result = "Missing attributes: "
                     for a in missing_attr:
                         result += str(a) + " "
+                    self.__c_logger.info("MISSING ATTR - RESULT: " + result)
+                    self.__f_logger.info("MISSING ATTR - RESULT: " + result)
                     return result
                 else:
+                    self.__c_logger.info("ATTR OK")
+                    self.__f_logger.info("ATTR OK")
                     return ""
             else:
                 result = "Missing attributes: "
                 for a in attribute_names:
                     result += str(a) + " "
+                self.__c_logger.info("MISSING ATTR - RESULT: " + result)
+                self.__f_logger.info("MISSING ATTR - RESULT: " + result)
                 return result
         else:
+            self.__c_logger.info("NO ATTRS --> OK")
+            self.__f_logger.info("NO ATTRS --> OK")
             return ""
 
     def __find_xml_tag(self, tag_name, meta_data):
+        self.__c_logger.info("Fetch tags from the meta data xml")
+        self.__f_logger.info("Fetch tags from the meta data xml")
         root = etree.fromstring(self.__xml)
         tag_instances = root.findall(".//" + tag_name.tag_name())
         if tag_instances:
+            self.__c_logger.info("EXISTS: " + tag_name.tag_name() + " (" + len(tag_instances) + ")")
+            self.__f_logger.info("EXISTS: " + tag_name.tag_name() + " (" + len(tag_instances) + ")")
             for tag in tag_instances:
                 msg = self.__validate_not_empty(tag, tag_name)
                 meta_data.add_meta_data(tag_name.tag_name(), msg)
                 if msg is not "OK" and meta_data.is_valid() is True:
                     meta_data.set_valid(False)
         else:
+            self.__c_logger.info("MISSING: " + tag_name.tag_name())
+            self.__f_logger.info("MISSING: " + tag_name.tag_name())
             meta_data.add_meta_data(tag_name.tag_name(), "Missing")
             if meta_data.is_valid() is True:
                 meta_data.set_valid(False)
@@ -91,15 +98,25 @@ class MetaDataValidator:
 
     def __validate_not_empty(self, tag, tag_config):
         if not tag_config.is_empty():
+            self.__c_logger.info("IS EMPTY IS NOT ALLOWED: " + tag_config.tag_name())
+            self.__f_logger.info("IS EMPTY IS NOT ALLOWED: " + tag_config.tag_name())
             if not (False if (tag.text is None)
                     else len(tag.text)) > 0:
+                self.__c_logger.info("NO CONTENT: " + tag_config.tag_name())
+                self.__f_logger.info("NO CONTENT: " + tag_config.tag_name())
                 return tag_config.tag_name(), "CONTENT EXPECTED"
             else:
+                self.__c_logger.info("CHECK ATTR: " + tag_config.tag_name())
+                self.__f_logger.info("CHECK ATTR: " + tag_config.tag_name())
                 attr_check = self.__validate_attribute(tag_config.attributes(),tag)
                 if len(attr_check) > 0:
                     return attr_check
         elif tag_config.is_empty():
+            self.__c_logger.info("IS EMPTY IS ALLOWED: " + tag_config.tag_name())
+            self.__f_logger.info("IS EMPTY IS ALLOWED: " + tag_config.tag_name())
             attr_check = self.__validate_attribute(tag_config.attributes(), tag)
+            self.__c_logger.info("CHECK ATTR: " + tag_config.tag_name())
+            self.__f_logger.info("CHECK ATTR: " + tag_config.tag_name())
             if len(attr_check) > 0:
                 return attr_check
         return "OK"

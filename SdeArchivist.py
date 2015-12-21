@@ -114,7 +114,10 @@ if __name__ == "__main__":
 
             print "\n3) VALIDATION OF: " + xml + "\n"
             validated_meta = MetaData.MetaData()
-            MetaDataValidator.MetaDataValidator(raw_meta[xml], required_tags).validate(validated_meta)
+            meta_validator = MetaDataValidator.MetaDataValidator(raw_meta[xml], required_tags)
+            meta_validator.set_console_logger(console_logger)
+            meta_validator.set_file_logger(file_logger)
+            meta_validator.validate(validated_meta)
             if validated_meta.is_valid():
                 print "OK!"
                 print "\n4) EXPORT OF: " + xml + "\n"
