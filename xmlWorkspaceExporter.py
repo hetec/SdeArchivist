@@ -36,7 +36,7 @@ class XmlWorkspaceExporter:
         self.__c_logger.info("EXPORTIERE: " + str(data))
         self.__f_logger.info("EXPORTIERE: " + str(data))
 
-        input_file = self.__base_path + "/config/" + self.__connection_name
+        input_file = self.__base_path + "/config/" + self.__connection_name + ".sde"
 
         location = self.__base_path + "/buffer"
 

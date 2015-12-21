@@ -81,8 +81,8 @@ class MetaDataValidator:
         root = etree.fromstring(self.__xml)
         tag_instances = root.findall(".//" + tag_name.tag_name())
         if tag_instances:
-            self.__c_logger.info("EXISTS: " + tag_name.tag_name() + " (" + len(tag_instances) + ")")
-            self.__f_logger.info("EXISTS: " + tag_name.tag_name() + " (" + len(tag_instances) + ")")
+            self.__c_logger.info("EXISTS: " + tag_name.tag_name() + " (" + str(len(tag_instances)) + ")")
+            self.__f_logger.info("EXISTS: " + tag_name.tag_name() + " (" + str(len(tag_instances)) + ")")
             for tag in tag_instances:
                 msg = self.__validate_not_empty(tag, tag_name)
                 meta_data.add_meta_data(tag_name.tag_name(), msg)

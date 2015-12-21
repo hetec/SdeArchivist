@@ -69,8 +69,8 @@ class SdeConnectionGenerator:
                              + self.__username + "\n")
 
         if self.__check_existence_of_sde_file():
-            self.__c_logger.info("Sde file already exists")
-            self.__f_logger.info("Sde file already exists")
+            self.__c_logger.info("Sde " + self.__sdeFile + " file already exists")
+            self.__f_logger.info("Sde " + self.__sdeFile + " file already exists")
         else:
             try:
                 self.__create_new_sde_connection_file()

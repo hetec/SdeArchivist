@@ -49,21 +49,36 @@ def check_project_structure(validator):
 
 
 if __name__ == "__main__":
-    existenceValidator = ExistenceValidator.ExistenceValidator()
-
-    check_project_structure(existenceValidator)
-
     props = SdeArchivistProperties.SdeArchivistProperties("config/archivist_config.json")
 
     console_logger = ArchivistLogger.ArchivistLogger(props.log_config).get_console_logger()
     file_logger = ArchivistLogger.ArchivistLogger(props.log_config).get_file_logger()
 
+    existenceValidator = ExistenceValidator.ExistenceValidator()
+    existenceValidator.set_console_logger(console_logger)
+    existenceValidator.set_file_logger(file_logger)
+
+    check_project_structure(existenceValidator)
+
+
+
     ms = MailSender.MailSender(props.mail_config)
     ms.set_console_logger(console_logger)
     ms.set_file_logger(file_logger)
 
-    connection = OracleConnection(props.database_config).connection()
+    cleaner = BufferCleaner.BufferCleaner()
+    cleaner.set_console_logger(console_logger)
+    cleaner.set_file_logger(file_logger)
+
+    ora_con = OracleConnection(props.database_config)
+    ora_con.set_console_logger(console_logger)
+    ora_con.set_file_logger(file_logger)
+    connection = ora_con.connection()
+
     ldap = LdapService.LdapService(props.ldap_config)
+    ldap.set_file_logger(file_logger)
+    ldap.set_console_logger(console_logger)
+
     sdeConf = props.sde_config
     archive_conf = props.sdearchive_config
 
@@ -170,9 +185,9 @@ if __name__ == "__main__":
                 ms.send_to_admin(out)
                 print out
 
-            BufferCleaner.BufferCleaner().clear_file(str(xml) + ".xml")
+            cleaner.clear_file(str(xml) + ".xml")
     else:
         # Logging
         print "No meta data available"
 
-    BufferCleaner.BufferCleaner().clear_all("buffer")
+    cleaner.clear_all("buffer")
