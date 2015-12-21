@@ -21,7 +21,7 @@ def handle_process_failure(cont_id, req_id, error, message, mailSender):
     try:
         meta_data_service.delete_by_id(req_id)
         meta_data_service.update_state(cont_id, message)
-    except DataException as e:
+    except Exception as e:
         inform_admin("Handling the exception (element id = " +
                      cont_id +
                      "): \n" +
@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
     try:
         raw_meta = meta_data_service.find_meta_data_by_dataset_names()
-    except DataException as e:
+    except Exception as e:
         raw_meta = {}
         inform_admin("Exception while fetching the meta data for the registered datasets: \n" +
                      e, ms)
@@ -89,7 +89,7 @@ if __name__ == "__main__":
             request_table_id = -1
             try:
                 request_table_id = meta_data_service.find_id_by_name(str(xml))
-            except DataException as e:
+            except Exception as e:
                 inform_admin(e, ms)
                 handle_process_failure(-1, request_table_id, e, "FAILED, INTERNAL ERROR", ms)
                 continue
@@ -97,7 +97,7 @@ if __name__ == "__main__":
             content_table_id = -1
             try:
                 content_table_id = meta_data_service.add_process(xml, "STARTED", xml)
-            except DataException as e:
+            except Exception as e:
                 inform_admin(e, ms)
                 handle_process_failure(content_table_id, request_table_id, e, "FAILED, INTERNAL ERROR", ms)
                 continue
@@ -124,7 +124,7 @@ if __name__ == "__main__":
                     try:
                         meta_data_service.delete_by_id(request_table_id)
                         meta_data_service.update_state(content_table_id, "FINISHED")
-                    except DataException as e:
+                    except Exception as e:
                         handle_process_failure(content_table_id, request_table_id, e, "CORRUPT (NOT ABLE TO SET STATE)")
                 else:
                     handle_process_failure(content_table_id, request_table_id, "The workspace xml " + str(xml) + " does not exist!",
@@ -140,11 +140,13 @@ if __name__ == "__main__":
                     ms.send_to_admin("Success")
             else:
                 try:
-                    meta_data_service.update_state(id, "INVALID META DATA")
-                except DataException as e:
+                    meta_data_service.delete_by_id(request_table_id)
+                    meta_data_service.update_state(content_table_id, "INVALID META DATA")
+                except Exception as e:
                     handle_process_failure(content_table_id, request_table_id, e, "CORRUPT (NOT ABLE TO SET STATE)")
                 out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
                 # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out)
+                ms.send_to_admin(out)
                 print out
 
             BufferCleaner.BufferCleaner().clear_file(str(xml) + ".xml")
