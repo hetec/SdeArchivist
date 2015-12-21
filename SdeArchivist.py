@@ -110,7 +110,10 @@ if __name__ == "__main__":
                 print "\n4) EXPORT OF: " + xml + "\n"
 
                 try:
-                    xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf, "sde").export(xml)
+                    exporter = xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf, "sde")
+                    exporter.set_console_logger(console_logger)
+                    exporter.set_file_logger(file_logger)
+                    exporter.export(xml)
                 except Exception as e:
                     handle_process_failure(content_table_id, request_table_id, e, "FAILED, EXPORT ERROR", ms)
                     continue

@@ -19,6 +19,12 @@ class XmlWorkspaceExporter:
         self.__base_path = properties["connection_file_path"]
         self.__connection_name = connection_name
 
+    def set_console_logger(self, console_logger):
+            self.__c_logger = console_logger
+
+    def set_file_logger(self, file_logger):
+        self.__f_logger = file_logger
+
     def export(self, data):
         """
         Exports the assigned data as an xmlWorkspaceDocument
@@ -27,14 +33,25 @@ class XmlWorkspaceExporter:
         :param data: The name of the SDE DataSet. Must be exportable as xmlWorkspaceDocument (String)
         :return:
         """
-        input_file = self.__base_path + "/config/sde.sde"
+        self.__c_logger.info("EXPORTIERE: " + str(data))
+        self.__f_logger.info("EXPORTIERE: " + str(data))
+
+        input_file = self.__base_path + "/config/" + self.__connection_name
+
         location = self.__base_path + "/buffer"
+
         input_file = input_file + "/" + data
+        self.__c_logger.info("INPUT FILE: " + input_file)
+        self.__f_logger.info("INPUT FILE: " + input_file)
+
         data = data.strip(" \t")
+
         output_file = location + "/" + data.encode('ascii', 'ignore') + ".xml"
+
         output_file = self.__check_file_name(output_file, data.encode('ascii', 'ignore'))
-        print "INPUT: " + input_file
-        print "OUTPUT: " + output_file
+        self.__c_logger.info("OUTPUT FILE: " + output_file)
+        self.__f_logger.info("OUTPUT FILE: " + output_file)
+
         try:
             arcpy.ExportXMLWorkspaceDocument_management(input_file,
                                                         output_file,
@@ -43,6 +60,8 @@ class XmlWorkspaceExporter:
                                                         "METADATA")
             print "\nExport to xml file -> " + data.encode('ascii', 'ignore') + " is finished!"
         except arcpy.ExecuteError as e:
+            self.__c_logger.exception("EXCEPTION WHILE EXPORTING: " + str(e))
+            self.__f_logger.exception("EXCEPTION WHILE EXPORTING: " + str(e))
             raise XMLWorkspaceDocumentExportError("Error while creating XMLWorkspaceDocument: " + e.message)
 
     def __check_file_name(self, output, identity):
