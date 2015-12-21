@@ -30,7 +30,7 @@ def handle_process_failure(cont_id, req_id, error, message, mailSender):
                      " \n"
                      "Maybe there is a problem with the database connection or the queried tables.")
 
-    mailSender.send("patrick.hebner@ufz.de", str(error))
+    mailSender.send("patrick.hebner@ufz.de", str(error), "failure")
 
     print str(error)
 
@@ -173,7 +173,7 @@ if __name__ == "__main__":
                                            "FAILED, IMPORT ERROR", ms)
                     continue
                 else:
-                    ms.send_to_admin("Success")
+                    ms.send("patrick.hebner@ufz.de", "SUCCESS", "success")
             else:
                 try:
                     meta_data_service.delete_by_id(request_table_id)
@@ -181,8 +181,8 @@ if __name__ == "__main__":
                 except Exception as e:
                     handle_process_failure(content_table_id, request_table_id, e, "CORRUPT (NOT ABLE TO SET STATE)")
                 out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
-                # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out)
-                ms.send_to_admin(out)
+                # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out, "failure")
+                ms.send("patrick.hebner@ufz.de", "FAILED! Your meta data are invalid: \n\n" + out, "failure")
                 print out
 
             cleaner.clear_file(str(xml) + ".xml")

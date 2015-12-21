@@ -35,8 +35,9 @@
     "username" : "",
     "password" : "",
     "additional_recipients" : [],
-    "subject" : "",
-    "failure_message" : ""
+    "failure_subject" : "",
+    "success_subject" : "",
+    "default_message" : ""
   },
   "log_config" : {
     "level" : "",

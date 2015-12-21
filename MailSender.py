@@ -22,7 +22,7 @@ class MailSender:
     def set_file_logger(self, file_logger):
         self.__f_logger = file_logger
 
-    def send(self, to, content):
+    def send(self, to, content, msg_type):
         try:
             self.__c_logger.debug("Mail connection: " +
                               str(self.__props["smtp_server"]) + ", " +
@@ -35,7 +35,7 @@ class MailSender:
             self.__f_logger.info("Log in to email server.")
             tos_addr = [to]
             tos_addr.extend(self.__props["additional_recipients"])
-            self.__smtpObj.sendmail(self.__props["from"], tos_addr, self.__build_msg(tos_addr, content))
+            self.__smtpObj.sendmail(self.__props["from"], tos_addr, self.__build_msg(tos_addr, content, msg_type))
             self.__c_logger.info("Send mail to " + str(tos_addr))
             self.__f_logger.info("Send mail to " + str(tos_addr))
         except Exception as e:
@@ -55,20 +55,30 @@ class MailSender:
             self.__f_logger.info("Log in to email server.")
             tos_addr = []
             tos_addr.extend(self.__props["additional_recipients"])
-            self.__smtpObj.sendmail(self.__props["from"], tos_addr, self.__build_msg(tos_addr, content))
+            self.__smtpObj.sendmail(self.__props["from"], tos_addr, self.__build_msg(tos_addr, content, "admin"))
             self.__c_logger.info("Send mail to " + str(tos_addr))
             self.__f_logger.info("Send mail to " + str(tos_addr))
         except Exception as e:
             self.__c_logger.exception("Unable to send admin emails.")
             self.__f_logger.exception("Unable to send admin emails.")
 
-    def __build_msg(self, to, content):
+    def __build_msg(self, to, content, msg_type):
         msg = multipart.MIMEMultipart()
         msg["FROM"] = self.__props["from"]
         msg["TO"] = ",".join(to)
-        msg["Subject"] = self.__props["subject"]
+        if msg_type == "failure":
+            msg["Subject"] = self.__props["failure_subject"]
+            body = self.__props["default_message"]
+        elif msg_type == "success":
+            msg["Subject"] = self.__props["success_subject"]
+            body = self.__props["default_message"]
+        elif msg_type == "admin":
+            msg["Subject"] = "!!!ADMIN INFO: sde archiving"
+            body = "The sde archiving service has behaved unexpected! Please see the message below:"
+        else:
+            raise ValueError(msg_type + " is not allowed. Please use failure or success")
 
-        body = self.__props["failure_message"]
+
         body += "\n\n" + content
         self.__c_logger.debug("Mail message: \n\n" +
                               msg.as_string())
