@@ -1,21 +1,28 @@
 # -*- encoding utf-8 -*-
-from OracleConnection import OracleConnection
-import MetaDataService
-import MetaDataValidator
-import MetaData
-import SdeArchivistProperties
-import LdapService
-import MetaDataRenderer
-import MailSender
-import SdeConnectionGenerator
-import xmlWorkspaceExporter
-import XmlWorkspaceImporter
-import xmlWorkspaceDocumentExportError
-import XmlImportException
-import ExistenceValidator
-import DataException
 import ArchivistLogger
 import BufferCleaner
+import ExistenceValidator
+import LdapService
+import MailSender
+import MetaData
+import MetaDataRenderer
+import MetaDataService
+import MetaDataValidator
+import SdeArchivistProperties
+import SdeConnectionGenerator
+import XmlWorkspaceImporter
+import xmlWorkspaceExporter
+from OracleConnection import OracleConnection
+
+# Do not change this!
+
+SDE_SOURCE_DB = "sde"
+SDE_ARCHIVE_DB = "sdearchive"
+BUFFER_DIR = "buffer"
+CONFIG_DIR = "config"
+CONFIG_FILE_NAME = "archivist_config.json"
+XML_EXTENSION = ".xml"
+
 
 def handle_process_failure(cont_id, req_id, error, message, mailSender):
     try:
@@ -40,16 +47,17 @@ def inform_admin(message, mailSender):
 
 
 def check_project_structure(validator):
-    buffer_exists = existenceValidator.directory_exists("buffer")
-    config_exists = existenceValidator.directory_exists("config")
-    config_file_exists = existenceValidator.config_file_exists("archivist_config.json")
+    buffer_exists = existenceValidator.directory_exists(BUFFER_DIR)
+    config_exists = existenceValidator.directory_exists(CONFIG_DIR)
+    config_file_exists = existenceValidator.config_file_exists(CONFIG_FILE_NAME)
 
     if not buffer_exists or not config_exists or not config_file_exists:
         raise Exception("Invalid project structure!")
 
 
 if __name__ == "__main__":
-    props = SdeArchivistProperties.SdeArchivistProperties("config/archivist_config.json")
+    #Get config from config/archivist_config.json
+    props = SdeArchivistProperties.SdeArchivistProperties(CONFIG_DIR + "/" +  CONFIG_FILE_NAME)
 
     console_logger = ArchivistLogger.ArchivistLogger(props.log_config).get_console_logger()
     file_logger = ArchivistLogger.ArchivistLogger(props.log_config).get_file_logger()
@@ -83,10 +91,10 @@ if __name__ == "__main__":
     archive_conf = props.sdearchive_config
 
     #Todo: combine these generators
-    connection_generator_sde = SdeConnectionGenerator.SdeConnectionGenerator(sdeConf, "sde")
+    connection_generator_sde = SdeConnectionGenerator.SdeConnectionGenerator(sdeConf, SDE_SOURCE_DB)
     connection_generator_sde.set_console_logger(console_logger)
     connection_generator_sde.set_file_logger(file_logger)
-    connection_generator_sdearchive = SdeConnectionGenerator.SdeConnectionGenerator(sdeConf, "sde")
+    connection_generator_sdearchive = SdeConnectionGenerator.SdeConnectionGenerator(archive_conf, SDE_ARCHIVE_DB)
     connection_generator_sdearchive.set_file_logger(file_logger)
     connection_generator_sdearchive.set_console_logger(console_logger)
 
@@ -140,7 +148,7 @@ if __name__ == "__main__":
                 print "\n4) EXPORT OF: " + xml + "\n"
 
                 try:
-                    exporter = xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf, "sde")
+                    exporter = xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf, SDE_SOURCE_DB)
                     exporter.set_console_logger(console_logger)
                     exporter.set_file_logger(file_logger)
                     exporter.export(xml)
@@ -151,11 +159,11 @@ if __name__ == "__main__":
                 if existenceValidator.buffered_xml_exists(str(xml) + ".xml"):
                     try:
                         print "\n5) IMPORT OF: " + xml + "\n"
-                        importer = XmlWorkspaceImporter.XmlWorkspaceImporter(archive_conf, "sdearchive")
+                        importer = XmlWorkspaceImporter.XmlWorkspaceImporter(archive_conf, SDE_ARCHIVE_DB)
                         importer.set_console_logger(console_logger)
                         importer.set_file_logger(file_logger)
-                        importer.archive(str(xml) + ".xml")
-                    except XmlImportException as e:
+                        importer.archive(str(xml) + XML_EXTENSION)
+                    except Exception as e:
                         handle_process_failure(content_table_id, request_table_id, e, "FAILED, IMPORT ERROR", ms)
                     try:
                         meta_data_service.delete_by_id(request_table_id)
@@ -167,9 +175,9 @@ if __name__ == "__main__":
                                            "FAILED, EXPORT ERROR", ms)
                     continue
 
-                if not existenceValidator.imported_sde_data_exists("sdearchive", "SDE." + xml.split(".")[1]):
+                if not existenceValidator.imported_sde_data_exists(SDE_ARCHIVE_DB, SDE_SOURCE_DB + "." + xml.split(".")[1]):
                     handle_process_failure(content_table_id, request_table_id, "The data: " + str(xml) +
-                                           " does not exist in the sdearchive after the import!",
+                                           " does not exist in the sde archive after the import!",
                                            "FAILED, IMPORT ERROR", ms)
                     continue
                 else:
@@ -185,9 +193,9 @@ if __name__ == "__main__":
                 ms.send("patrick.hebner@ufz.de", "FAILED! Your meta data are invalid: \n\n" + out, "failure")
                 print out
 
-            cleaner.clear_file(str(xml) + ".xml")
+            cleaner.clear_file(str(xml) + XML_EXTENSION)
     else:
         # Logging
         print "No meta data available"
 
-    cleaner.clear_all("buffer")
+    cleaner.clear_all(BUFFER_DIR)
