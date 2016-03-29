@@ -12,6 +12,7 @@ import SdeArchivistProperties
 import SdeConnectionGenerator
 import XmlWorkspaceImporter
 import xmlWorkspaceExporter
+import DatasetRenameService
 from OracleConnection import OracleConnection
 
 # Do not change this in the rest of the code!
@@ -26,7 +27,11 @@ XML_EXTENSION = ".xml"
 SUCCESS_MAIL_STATE = "success"
 FAILURE_MAIL_STATE = "failure"
 
-def handle_process_failure(cont_id, req_id, error, message, mailSender):
+def handle_process_failure(cont_id,
+                           req_id,
+                           error,
+                           message,
+                           mailSender):
     """
     Handles unexpected situations by updating the request and content tables
     and sending status mails
@@ -39,6 +44,8 @@ def handle_process_failure(cont_id, req_id, error, message, mailSender):
     try:
         meta_data_service.delete_by_id(req_id)
         meta_data_service.update_state(cont_id, message)
+        console_logger.error(str(error))
+        file_logger.error(str(error))
     except Exception as e:
         inform_admin("Handling the exception (element id = " +
                      cont_id +
@@ -46,7 +53,8 @@ def handle_process_failure(cont_id, req_id, error, message, mailSender):
                      str(error) +
                      " raises also a exception: \n" + str(e) +
                      " \n"
-                     "Maybe there is a problem with the database connection or the queried tables.")
+                     "Maybe there is a problem with the database connection or the queried tables.",
+                     mailSender)
 
     mailSender.send("patrick.hebner@ufz.de", str(error), FAILURE_MAIL_STATE)
 
@@ -217,7 +225,9 @@ if __name__ == "__main__":
                             meta_data_service.delete_by_id(request_table_id)
                             meta_data_service.update_state(content_table_id, "FINISHED")
                         except Exception as e:
-                            handle_process_failure(content_table_id, request_table_id, e, "CORRUPT (NOT ABLE TO SET STATE)")
+                            handle_process_failure(content_table_id, request_table_id, e,
+                                                   "CORRUPT (NOT ABLE TO SET STATE)",
+                                                   ms)
                     except Exception as e:
                         handle_process_failure(content_table_id, request_table_id, e, "FAILED, IMPORT ERROR", ms)
                 else:
@@ -235,14 +245,29 @@ if __name__ == "__main__":
                                            "FAILED, IMPORT ERROR", ms)
                     continue
                 else:
-                    ms.send("patrick.hebner@ufz.de", "SUCCESS", SUCCESS_MAIL_STATE)
+                    try:
+                        renameService = DatasetRenameService.DatasetRenameService(archive_conf, existenceValidator)
+                        renameService.setConsoleLogger(console_logger)
+                        renameService.setFileLogger(file_logger)
+                        xml = renameService.rename(xml)
+                        ms.send("patrick.hebner@ufz.de", "SUCCESS", SUCCESS_MAIL_STATE)
+                    except Exception as e:
+                        inform_admin("The renaming of the persisted dataset: " + xml +
+                                     " failed because of an exception. There are maybe" +
+                                     " corrupt data with wrong naming in the sde archive schema. Exception: " + str(e),
+                                     ms)
+                        handle_process_failure(content_table_id, request_table_id, e,
+                                               "FAILED, RENAMING ERROR",
+                                               ms)
             else:
                 # Update state of the content table for invalid metadata
                 try:
                     meta_data_service.delete_by_id(request_table_id)
                     meta_data_service.update_state(content_table_id, "INVALID META DATA")
                 except Exception as e:
-                    handle_process_failure(content_table_id, request_table_id, e, "CORRUPT (NOT ABLE TO SET STATE)")
+                    handle_process_failure(content_table_id, request_table_id, e,
+                                           "CORRUPT (NOT ABLE TO SET STATE)",
+                                           ms)
 
                 # Send a mail to inform about the invalid metadata
                 out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()

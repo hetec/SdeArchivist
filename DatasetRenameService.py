@@ -1,0 +1,68 @@
+# -*- encoding utf-8 -*-
+from xmlWorkspaceDocumentExportError import XMLWorkspaceDocumentExportError
+import os
+import arcpy
+import RenamingException
+
+class DatasetRenameService:
+    """
+    Service to rename a persisted dataset.
+    """
+
+    def __init__(self, archiveProperties, existenceValidator):
+        """
+        Create a new instance of the DatasetRenameService
+
+        :param archiveProperties: A map with the property data for the sde archive
+        :param existenceValidator: An existence validator instance
+        :return:
+        """
+        self.__path = archiveProperties["connection_file_path"] + "/config/sdearchive.sde/"
+        self.__validator = existenceValidator
+
+    def __checkExistenceAndIncr(self, name):
+        counter = 1
+        temp_name = name
+        while self.__validator.imported_sde_data_exists("sdearchive", temp_name):
+            temp_name = name + "_" + str(counter)
+            counter += 1
+        return temp_name
+
+    def rename(self, data):
+        """
+        Renames a persisted dataset in the manner OLDUSER.datasetname -> NEWUSER.datasetname_OLDUSER.
+        If the dataset name already exists a counter will be added like NEWUSER.datasetname_OLDUSER_Counter
+
+        :param data: The name of the data without an extension -> USER.dataname
+        :return: The new name
+        :except: Throws Renaming Exception
+        """
+        old_name = "SDE." + data.split(".")[1]
+        self.__c_logger.debug("Old dataset name in sde archive: " + old_name)
+        self.__f_logger.debug("Old dataset name in sde archive: " + old_name)
+        new_name = old_name + "_" + data.split(".")[0]
+        new_name = self.__checkExistenceAndIncr(new_name)
+
+        self.__c_logger.debug("Try to rename to new dataset name: " + new_name)
+        self.__f_logger.debug("Try to rename to new dataset name: " + new_name)
+
+        try:
+            arcpy.env.workspace = self.__path
+
+            arcpy.Rename_management(
+                old_name,
+                new_name
+            )
+        except Exception as e:
+            self.__c_logger.debug("There was an error during renaming the persisted data: " + str(e))
+            self.__f_logger.debug("There was an error during renaming the persisted data: " + str(e))
+            raise RenamingException.RenamingException(
+                "There was an error during renaming the persisted data: " + str(e))
+
+        return new_name
+
+    def setConsoleLogger(self, consoleLogger):
+        self.__c_logger = consoleLogger
+
+    def setFileLogger(self, fileLogger):
+        self.__f_logger = fileLogger
