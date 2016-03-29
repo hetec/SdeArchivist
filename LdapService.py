@@ -38,8 +38,8 @@ class LdapService:
             self.__c_logger.debug("Get email address for " + uid +": " + res)
             self.__f_logger.debug("Get email address for " + uid +": " + res)
         except Exception as e:
-            self.__c_logger.exception("EXCEPTION while getting email address for " + uid +": " + res + ": " + str(e))
-            self.__f_logger.exception("EXCEPTION while getting email address for " + uid +": " + res + ": " + str(e))
+            self.__c_logger.exception("EXCEPTION while getting email address for " + uid + ": " + res + ": " + str(e))
+            self.__f_logger.exception("EXCEPTION while getting email address for " + uid + ": " + res + ": " + str(e))
             raise Exception("Not able to execute the search request on the server: '" + self.__props["server"]
                             + "', ERROR: " + str(e.message))
         if len(res) > 0 and res is not None:
