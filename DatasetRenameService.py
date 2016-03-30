@@ -17,7 +17,7 @@ class DatasetRenameService:
         :param existenceValidator: An existence validator instance
         :return:
         """
-        self.__path = archiveProperties["connection_file_path"] + "/config/sdearchive.sde/"
+        self.__path = archiveProperties["project_root"] + "/config/sdearchive.sde/"
         self.__validator = existenceValidator
 
     def __checkExistenceAndIncr(self, name):

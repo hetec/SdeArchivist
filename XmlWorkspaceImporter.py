@@ -6,7 +6,7 @@ from XmlImportException import XmlImportException
 class XmlWorkspaceImporter:
 
     def __init__(self, properties, connection_name):
-        self.__base_path = properties["connection_file_path"]
+        self.__base_path = properties["project_root"]
         self.__sde_file = self.__base_path + "/config/" + connection_name + ".sde"
         self.__data = self.__base_path + "/buffer/"
 

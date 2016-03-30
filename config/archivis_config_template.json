@@ -9,7 +9,7 @@
     "content_table" : ""
   },
   "sde_config" : {
-    "connection_file_path" : "",
+    "project_root" : "",
     "database_type" : "",
     "instance_name" : "",
     "auth_method" : "",
@@ -17,7 +17,7 @@
     "password" : ""
   },
   "sdearchivist_config" : {
-    "connection_file_path" : "",
+    "project_root" : "",
     "database_type" : "",
     "instance_name" : "",
     "auth_method" : "",
@@ -34,7 +34,7 @@
     "from" : "",
     "username" : "",
     "password" : "",
-    "additional_recipients" : [],
+    "admin_recipients" : [],
     "failure_subject" : "",
     "success_subject" : "",
     "default_message" : ""

@@ -16,7 +16,7 @@ class SdeConnectionGenerator:
         :param connection_name: Name of the connection (String)
         :return: new SdeConnectionGenerator instance
         """
-        self.__basePath = properties["connection_file_path"] + "/config"
+        self.__basePath = properties["project_root"] + "/config"
         self.__sdeFileName = str(connection_name) + ".sde"
         self.__sdeFile = self.__basePath + "/" + self.__sdeFileName
         self.__database = properties["database_type"]

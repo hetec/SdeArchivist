@@ -12,11 +12,11 @@ class XmlWorkspaceExporter:
     def __init__(self, properties, connection_name):
         """
         Creates a new XmlWorkspaceExporter instance
-        :param properties: Properties which must provide the 'connection_file_path'
+        :param properties: Properties which must provide the 'project_root'
         :param connection_name: Name of the connection (String)
         :return: new XmlWorkspaceExporter instance
         """
-        self.__base_path = properties["connection_file_path"]
+        self.__base_path = properties["project_root"]
         self.__connection_name = connection_name
 
     def set_console_logger(self, console_logger):

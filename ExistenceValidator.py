@@ -4,7 +4,7 @@ import arcpy
 from ExistenceException import ExistenceException
 
 
-class ExistenceValidator():
+class ExistenceValidator:
     """
     Verifies the existence of files
     """

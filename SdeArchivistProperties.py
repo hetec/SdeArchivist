@@ -74,7 +74,7 @@ class SdeArchivistProperties:
             else:
                 raise ValueError("Missing mail config entry "
                                  "(smtp_server, port, from, subject, password, failure_subject, success_subject,"
-                                 " default_message, additional_recipients)")
+                                 " default_message, admin_recipients)")
 
     def __extract_sde_config(self, dct):
         if "sde_config" in dct:
@@ -82,7 +82,7 @@ class SdeArchivistProperties:
                 return dct["sde_config"]
             else:
                 raise ValueError("Missing sde config entry "
-                                 "(connectionFilePath, database_type, instance_name, auth_method, username, password)")
+                                 "(project_root, database_type, instance_name, auth_method, username, password)")
 
     def __extract_sdearchive_config(self, dct):
         if "sdearchive_config" in dct:
@@ -90,7 +90,7 @@ class SdeArchivistProperties:
                 return dct["sdearchive_config"]
             else:
                 raise ValueError("Missing sdearchive config entry "
-                                 "(connectionFilePath, database_type, instance_name, auth_method, username, password)")
+                                 "(project_root, database_type, instance_name, auth_method, username, password)")
 
     def __extract_log_config(self, dct):
         if "log_config" in dct:
@@ -137,13 +137,13 @@ class SdeArchivistProperties:
             valid_config = False
         if "success_subject" not in config:
             valid_config = False
-        if "additional_recipients" not in config:
+        if "admin_recipients" not in config:
             valid_config = False
         return valid_config
 
     def __validate_sde_config(self, config):
         valid_config = True
-        if "connection_file_path" not in config:
+        if "project_root" not in config:
             valid_config = False
         if "database_type" not in config:
             valid_config = False
@@ -159,7 +159,7 @@ class SdeArchivistProperties:
 
     def __validate_sdearchive_config(self, config):
         valid_config = True
-        if "connection_file_path" not in config:
+        if "project_root" not in config:
             valid_config = False
         if "database_type" not in config:
             valid_config = False
