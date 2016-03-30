@@ -6,10 +6,15 @@ from email import MIMEMultipart as multipart
 
 class MailSender:
     """
-    Enables sending emails to a assigned user
+    Enables sending emails to a user or defined admins
     """
 
     def __init__(self, properties):
+        """
+        Creates a pre-configured instance
+
+        :param properties: The mail configuration data
+        """
         self.__props = properties
         #only ascii for the server and port
         self.__smtpObj = smtplib.SMTP(str(self.__props["smtp_server"]), str(self.__props["port"]))
@@ -17,12 +22,28 @@ class MailSender:
 
 
     def set_console_logger(self, console_logger):
+        """
+        Set a console logger
+        :param console_logger: A logger instance
+        """
         self.__c_logger = console_logger
 
     def set_file_logger(self, file_logger):
+        """
+        Set a file logger
+        :param file_logger: A logger instance
+        """
         self.__f_logger = file_logger
 
     def send(self, to, content, msg_type):
+        """
+        Send a email to a defined recipient. If 'get_user_process_info'
+        is enabled in the config file the email is also send to the configured
+        list of admins
+        :param to: recipient
+        :param content: The message which is displayed after the default message configured in the config file
+        :param msg_type: Success or failure
+        """
         try:
             self.__c_logger.debug("Mail connection: " +
                               str(self.__props["smtp_server"]) + ", " +
@@ -44,6 +65,10 @@ class MailSender:
             self.__f_logger.exception("Unable to send emails.")
 
     def send_to_admin(self, content):
+        """
+        Sends an email to the configured list of admins.
+        :param content: The main message of the email. Displayed after a predefined default message.
+        """
         try:
             self.__c_logger.debug("Mail connection: " +
                               str(self.__props["smtp_server"]) + ", " +
@@ -64,6 +89,14 @@ class MailSender:
             self.__f_logger.exception("Unable to send admin emails.")
 
     def __build_msg(self, to, content, msg_type):
+        """
+        Constructs a message body from a given content and a configured default message.
+        Sets also the SUBJECT and the FROM fields.
+        :param to: recipient
+        :param content: The main message
+        :param msg_type: Success or Failure
+        :return: The message as string
+        """
         msg = multipart.MIMEMultipart()
         msg["FROM"] = self.__props["from"]
         msg["TO"] = ",".join(to)

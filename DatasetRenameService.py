@@ -7,6 +7,7 @@ import RenamingException
 class DatasetRenameService:
     """
     Service to rename a persisted dataset.
+
     """
 
     def __init__(self, archiveProperties, existenceValidator):

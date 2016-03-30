@@ -1,4 +1,7 @@
 # -*- encoding utf-8 -*-
+"""
+    This project enables the automatic archiving of geographic data
+"""
 import ArchivistLogger
 import BufferCleaner
 import ExistenceValidator
@@ -58,7 +61,7 @@ def handle_process_failure(cont_id,
 
     mailSender.send("patrick.hebner@ufz.de", str(error), FAILURE_MAIL_STATE)
 
-    print str(error)
+    #print str(error)
 
 
 def inform_admin(message, mailSender):
@@ -146,7 +149,7 @@ if __name__ == "__main__":
     meta_data_service.set_console_logger(console_logger)
     meta_data_service.set_file_logger(file_logger)
 
-    print "\n1) GET ALL ENTRIES OF THE REQUEST TABLE\n"
+    #print "\n1) GET ALL ENTRIES OF THE REQUEST TABLE\n"
 
     # Get the meta data for all entries of the request table if they exist in the database
     # Search is based on the data name
@@ -162,7 +165,7 @@ if __name__ == "__main__":
     # If there are at one or more entries in the database table continue for each meta data entry
     if len(raw_meta) > 0:
         for xml in raw_meta:
-            print "\n2) ADD TO CONTENTS TABLE: " + xml + "\n"
+            #print "\n2) ADD TO CONTENTS TABLE: " + xml + "\n"
 
             # Get the id of the row in the request table
             request_table_id = -1
@@ -183,7 +186,7 @@ if __name__ == "__main__":
                 continue
 
             # Verify the current meta data against the required tags specified in the config file
-            print "\n3) VALIDATION OF: " + xml + "\n"
+            #print "\n3) VALIDATION OF: " + xml + "\n"
             # Meta data object to hold information about the current meta data
             validated_meta = MetaData.MetaData()
             # Create the meta data validator
@@ -194,8 +197,8 @@ if __name__ == "__main__":
             meta_validator.validate(validated_meta)
             # Ask the meta data object if there are some issues. If not continue.
             if validated_meta.is_valid():
-                print "OK!"
-                print "\n4) EXPORT OF: " + xml + "\n"
+                #print "OK!"
+                #print "\n4) EXPORT OF: " + xml + "\n"
                 # Try to export the data to a xml workspace document into the buffer directory
                 try:
                     # Create the exporter
@@ -212,7 +215,7 @@ if __name__ == "__main__":
                 # data to the read only database schema
                 if existenceValidator.buffered_xml_exists(str(xml) + ".xml"):
                     try:
-                        print "\n5) IMPORT OF: " + xml + "\n"
+                        #print "\n5) IMPORT OF: " + xml + "\n"
                         # Create the importer
                         importer = XmlWorkspaceImporter.XmlWorkspaceImporter(archive_conf, SDE_ARCHIVE_DB)
                         importer.set_console_logger(console_logger)
@@ -273,13 +276,14 @@ if __name__ == "__main__":
                 out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
                 # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out, FAILURE_MAIL_STATE)
                 ms.send("patrick.hebner@ufz.de", "FAILED! Your meta data are invalid: \n\n" + out, FAILURE_MAIL_STATE)
-                print out
+                #print out
 
             # Remove the buffered file
             cleaner.clear_file(str(xml) + XML_EXTENSION)
     else:
+        pass
         # Handle name mismatches
-        print "No meta data available"
+        #print "No meta data available"
 
     # Remove all remaining files from the buffer
     cleaner.clear_all(BUFFER_DIR)
