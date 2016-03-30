@@ -115,8 +115,8 @@ class MetaDataService:
                     break
             self.__c_logger.exception("MAX dataset ID in the content table = " + str(dataset_id))
             if(dataset_id == None):
+                self.__c_logger.exception("No entries in content tabe -> Set id to 0: ID = " + str(dataset_id))
                 dataset_id = 0
-            self.__c_logger.exception("No entries in content tabe -> Set id to 0: ID = " + str(dataset_id))
             return (dataset_id + 1)
 
         except cx_Oracle.DatabaseError as e:

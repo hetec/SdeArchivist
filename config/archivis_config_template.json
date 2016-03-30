@@ -49,15 +49,18 @@
   "tag_config" : {
     "required" : [
       {
-        "tag_name" : "keyword"
+        "tag_name" : "keyword",
+        "mapped_name" : ""
       },
       {
         "tag_name" : "CharSetCd",
+        "mapped_name" : "",
         "is_empty" : true,
         "attributes" : ["value"]
       },
       {
          "tag_name" : "dataIdInfo/dataLang/languageCode",
+         "mapped_name" : "",
          "is_empty" : true,
          "attributes" : ["value"]
       }

@@ -104,7 +104,7 @@ class MetaDataValidator:
                     else len(tag.text)) > 0:
                 self.__c_logger.info("NO CONTENT: " + tag_config.tag_name())
                 self.__f_logger.info("NO CONTENT: " + tag_config.tag_name())
-                return tag_config.tag_name(), "CONTENT EXPECTED"
+                return "CONTENT EXPECTED"
             else:
                 self.__c_logger.info("CHECK ATTR: " + tag_config.tag_name())
                 self.__f_logger.info("CHECK ATTR: " + tag_config.tag_name())

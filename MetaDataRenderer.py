@@ -19,7 +19,7 @@ class MetaDataRenderer:
         Creates a simple text table of the key value pairs
         :return: Meta data as table (String)
         """
-        meta_data_dict = self.__meta_data.meta_data();
+        meta_data_dict = self.__meta_data.meta_data()
         rendered_meta = ""
         for key in meta_data_dict:
             rendered_meta += "{:>30} | {}\n".format(key, meta_data_dict[key])

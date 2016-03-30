@@ -6,7 +6,15 @@
 Welcome to SdeArchivist's documentation!
 ========================================
 
-Contents:
+**General Information**
+
+.. toctree::
+   :maxdepth: 2
+
+   Configuration
+   Tags
+
+**Api Documentation**
 
 .. toctree::
    :maxdepth: 2
@@ -23,3 +31,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
