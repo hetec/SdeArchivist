@@ -250,12 +250,20 @@ if __name__ == "__main__":
                                            "FAILED, IMPORT ERROR", ms)
                     continue
                 else:
+                    # Rename the persisted dataset in the archive schema
                     try:
                         renameService = DatasetRenameService.DatasetRenameService(archive_conf, existenceValidator)
                         renameService.setConsoleLogger(console_logger)
                         renameService.setFileLogger(file_logger)
                         xml = renameService.rename(xml)
-                        ms.send("patrick.hebner@ufz.de", "SUCCESS", SUCCESS_MAIL_STATE)
+                        # Update the name column in the content table to the name after the renaming process
+                        try:
+                            meta_data_service.update_name(content_table_id, xml)
+                            ms.send("patrick.hebner@ufz.de", "SUCCESS", SUCCESS_MAIL_STATE)
+                        except Exception as e:
+                            handle_process_failure(content_table_id, request_table_id, e,
+                                                   "CORRUPT (NOT ABLE TO SET NAME)",
+                                                   ms)
                     except Exception as e:
                         inform_admin("The renaming of the persisted dataset: " + xml +
                                      " failed because of an exception. There are maybe" +

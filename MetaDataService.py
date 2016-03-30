@@ -6,12 +6,13 @@ from DataException import DataException
 
 class MetaDataService:
     """
-    A service to get the metadata of flagged sde data from the oracle database
+    Service to process several database operations on the
+    meta data, request table and content table
     """
 
     def __init__(self, connection):
         """
-        Creates a new MetaDataService
+        Creates a new MetaDataService instance
 
         :param connection: A connection object (cx_Oracle connection object)
         :return: New MetaDataService
@@ -19,35 +20,50 @@ class MetaDataService:
         self.con = connection
 
     def set_console_logger(self, console_logger):
+        """
+        Set the console logger
+        :param console_logger: logger instance
+        """
         self.__c_logger = console_logger
 
     def set_file_logger(self, file_logger):
+        """
+        Set the file logger
+        :param file_logger: logger instance
+        """
         self.__f_logger = file_logger
-
 
     def find_all_requests(self):
         """
         Queries all dataset names by the names in the ArcGIS requests table
         :return: Names (List)
+        :exception: DataException
         """
+        try:
+            query = "SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_ORDERS_EVW r"
 
-        query = "SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_ORDERS_EVW r"
-
-        cur = self.con.cursor()
-        cur.prepare(query)
-        cur.execute(None)
-        cur.arraysize = 100
-        result = cur.fetchall()
-        list = []
-        for r in result:
-            list.append(r)
-        cur.close()
-        return list
+            cur = self.con.cursor()
+            cur.prepare(query)
+            cur.execute(None)
+            cur.arraysize = 100
+            result = cur.fetchall()
+            list = []
+            for r in result:
+                list.append(r)
+            cur.close()
+            return list
+        except cx_Oracle.DatabaseError as e:
+            self.__c_logger.exception("EXCEPTION WHILE finding meta data: " + str(e))
+            self.__f_logger.exception("EXCEPTION WHILE finding meta data: " + str(e))
+            raise DataException("Error while fetching all datasets: " + str(e))
+        finally:
+            cur.close()
 
     def find_meta_data_by_dataset_names(self):
         """
         Queries all xml meta data clobs by the names in the ArcGIS requests table
         :return: Meta data (Dictionary)
+        :exception: DataException
         """
         self.__c_logger.info("Find meta data by dataset name")
         self.__f_logger.info("Find meta data by dataset name")
@@ -77,10 +93,15 @@ class MetaDataService:
             cur.close()
 
     def find_max_id(self):
+        """
+        Queries the maximum id value in the content table. If no entries are
+        available the id will be set to 1
+        :return: ID (Integer)
+        :exception: DataException
+        """
         self.__c_logger.info("Find max id in content table")
         self.__f_logger.info("Find max id in content table")
         try:
-            #getId = "SELECT r.OBJECTID FROM SDE.ARCHIVE_ORDERS_EVW r WHERE r.NAME_OF_DATASET = :data_name"
             getId = "SELECT MAX(c.OBJECTID) FROM ARCHIVE_CONTENT_EVW c"
             cur = self.con.cursor()
             cur.prepare(getId)
@@ -94,7 +115,7 @@ class MetaDataService:
                     break
             self.__c_logger.exception("MAX dataset ID in the content table = " + str(dataset_id))
             if(dataset_id == None):
-                dataset_id = 0;
+                dataset_id = 0
             self.__c_logger.exception("No entries in content tabe -> Set id to 0: ID = " + str(dataset_id))
             return (dataset_id + 1)
 
@@ -136,6 +157,15 @@ class MetaDataService:
             cur.close()
 
     def add_process(self, dataset_name, remarks, org_name):
+        """
+        Add a new process entry to the content table
+
+        :param dataset_name: Name of the archived dataset
+        :param remarks: Notes about the current process state or failure
+        :param org_name: The original dataset name
+        :return: ID of the entry (Integer)
+        :exception: DataException
+        """
         self.__c_logger.info("Add process information to the content table")
         self.__f_logger.info("Add process information to the content table")
         did = self.find_max_id()
@@ -161,6 +191,12 @@ class MetaDataService:
             cur.close()
 
     def update_state(self, data_id, state):
+        """
+        Set the state of a row in the content table. The row is found by dataset ID
+        :param data_id: Id of the related dataset (Integer)
+        :param state: The new value of the state column (String)
+        :exception: DataException
+        """
         self.__c_logger.info("Update process information to the content table")
         self.__f_logger.info("Update process information to the content table")
         try:
@@ -177,7 +213,36 @@ class MetaDataService:
         finally:
             cur.close()
 
+    def update_name(self, data_id, name):
+        """
+        Set the name of a row in the content table. The row is found by dataset ID
+        :param data_id: Id of the related dataset (Integer)
+        :param name: The new value of the state column (String)
+        :exception: DataException
+        """
+        self.__c_logger.info("Update process information (name) to the content table")
+        self.__f_logger.info("Update process information (name) to the content table")
+        try:
+            query = "UPDATE SDE.ARCHIVE_CONTENT_EVW c SET c.NAME_OF_DATASET = :name WHERE c.OBJECTID = :data_id"
+            cur = self.con.cursor()
+            cur.prepare(query)
+            cur.execute(None, {'name': name, 'data_id': data_id})
+            self.con.commit()
+        except cx_Oracle.DatabaseError as e:
+            self.con.rollback()
+            self.__c_logger.exception("EXCEPTION WHILE updating process information (name) to the content table: "
+                                      + str(e))
+            self.__f_logger.exception("EXCEPTION WHILE updating process information (name) to the content table: "
+                                      + str(e))
+            raise DataException("Exception while updating the name column of SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
+        finally:
+            cur.close()
+
     def delete_by_id(self, data_id):
+        """
+        Delete a row of the request table by id
+        :param data_id: Dataset ID (Integer)
+        """
         self.__c_logger.info("Delete request from the request table")
         self.__f_logger.info("Delete request from the request table")
         try:
