@@ -1,0 +1,5 @@
+SdeArchivist
+============
+
+.. automodule:: SdeArchivist
+    :members:

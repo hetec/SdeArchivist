@@ -1,6 +1,9 @@
 # -*- encoding utf-8 -*-
 """
-    This project enables the automatic archiving of geographic data
+    Project to enable automatic archiving of geographic data which
+    are persisted in an ArcSDE geo-database
+
+    This module defines the main program logic.
 """
 import ArchivistLogger
 import BufferCleaner
@@ -19,7 +22,6 @@ import DatasetRenameService
 from OracleConnection import OracleConnection
 
 # Do not change this in the rest of the code!
-
 SDE_SOURCE_DB = "sde"
 SDE_ARCHIVE_DB = "sdearchive"
 BUFFER_DIR = "buffer"
@@ -67,8 +69,8 @@ def handle_process_failure(cont_id,
 def inform_admin(message, mailSender):
     """
     Send an email to the configured admin/s
-    :param message:
-    :param mailSender:
+    :param message: content of the email
+    :param mailSender: MailSender instance
     """
     mailSender.send_to_admin(str(message))
 
@@ -78,7 +80,7 @@ def check_project_structure(validator):
     Checks if the necessary directories (config, buffer) and the
     config file exist in the right location
 
-    :param validator:
+    :param validator: validator instance
     """
     buffer_exists = existenceValidator.directory_exists(BUFFER_DIR)
     config_exists = existenceValidator.directory_exists(CONFIG_DIR)
