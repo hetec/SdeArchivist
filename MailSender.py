@@ -34,7 +34,8 @@ class MailSender:
             self.__c_logger.info("Log in to email server.")
             self.__f_logger.info("Log in to email server.")
             tos_addr = [to]
-            tos_addr.extend(self.__props["admin_recipients"])
+            if self.__props["get_user_process_info"] == True:
+                tos_addr.extend(self.__props["admin_recipients"])
             self.__smtpObj.sendmail(self.__props["from"], tos_addr, self.__build_msg(tos_addr, content, msg_type))
             self.__c_logger.info("Send mail to " + str(tos_addr))
             self.__f_logger.info("Send mail to " + str(tos_addr))

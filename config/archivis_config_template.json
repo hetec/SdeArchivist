@@ -34,6 +34,7 @@
     "from" : "",
     "username" : "",
     "password" : "",
+    "get_user_process_info" : false,
     "admin_recipients" : [],
     "failure_subject" : "",
     "success_subject" : "",
