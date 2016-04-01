@@ -7,16 +7,18 @@ class RequiredTag:
     Represents a tag which is required by valid meta data
     """
 
-    def __init__(self, tag_name, is_empty=False, attributes=()):
+    def __init__(self, tag_name, is_empty=False, mapped_name="", attributes=()):
         """
         Creates a new RequiredTag object
 
         :param tag_name: The name of the tag (String)
         :param attributes: The required attributes of this tag
+        :param mapped_name: If populated this name is used instead of the xml tag name
         :param is_empty: Defines if a tag has content or not (Boolean, Default: False)
         :return: New RequiredTag object
         """
         self.__tag_name = tag_name
+        self.__mapped_name = mapped_name
         self.__attributes = attributes
         self.__is_empty_tag = is_empty
 
@@ -27,6 +29,14 @@ class RequiredTag:
         :return: Tag name (String)
         """
         return self.__tag_name
+
+    def mapped_name(self):
+        """
+        Returns the value for the mapped name
+
+        :return: mapped_name (String)
+        """
+        return self.__mapped_name
 
     def is_empty(self):
         """

@@ -85,13 +85,13 @@ class MetaDataValidator:
             self.__f_logger.info("EXISTS: " + tag_name.tag_name() + " (" + str(len(tag_instances)) + ")")
             for tag in tag_instances:
                 msg = self.__validate_not_empty(tag, tag_name)
-                meta_data.add_meta_data(tag_name.tag_name(), msg)
+                meta_data.add_meta_data(self.__getRightTagName(tag_name), msg)
                 if msg is not "OK" and meta_data.is_valid() is True:
                     meta_data.set_valid(False)
         else:
             self.__c_logger.info("MISSING: " + tag_name.tag_name())
             self.__f_logger.info("MISSING: " + tag_name.tag_name())
-            meta_data.add_meta_data(tag_name.tag_name(), "Missing")
+            meta_data.add_meta_data(self.__getRightTagName(tag_name), "Missing")
             if meta_data.is_valid() is True:
                 meta_data.set_valid(False)
         return tag_instances
@@ -104,7 +104,7 @@ class MetaDataValidator:
                     else len(tag.text)) > 0:
                 self.__c_logger.info("NO CONTENT: " + tag_config.tag_name())
                 self.__f_logger.info("NO CONTENT: " + tag_config.tag_name())
-                return tag_config.tag_name(), "CONTENT EXPECTED"
+                return "CONTENT EXPECTED"
             else:
                 self.__c_logger.info("CHECK ATTR: " + tag_config.tag_name())
                 self.__f_logger.info("CHECK ATTR: " + tag_config.tag_name())
@@ -120,5 +120,13 @@ class MetaDataValidator:
             if len(attr_check) > 0:
                 return attr_check
         return "OK"
+
+    def __getRightTagName(self, tag):
+        if not tag.mapped_name():
+            print "No mapped name: " + tag.tag_name()
+            return tag.tag_name()
+        else:
+            print "Mapped name: " + str(tag.mapped_name())
+            return tag.mapped_name()
 
 

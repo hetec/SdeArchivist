@@ -50,6 +50,7 @@ class SdeArchivistProperties:
             return {str(entry["tag_name"]): RequiredTag.RequiredTag(
                 entry["tag_name"],
                 entry["is_empty"] if "is_empty" in entry else False,
+                entry["mapped_name"],
                 entry["attributes"] if "attributes" in entry else [])
                     for entry in dct["tag_config"]["required"]}
 
