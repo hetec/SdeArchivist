@@ -46,12 +46,17 @@ class SdeArchivistProperties:
             config_stream.close()
 
     def __extract_tag_config(self, dct):
-        if "tag_config" in dct:
-            return {str(entry["tag_name"]): RequiredTag.RequiredTag(
-                entry["tag_name"],
-                entry["is_empty"] if "is_empty" in entry else False,
-                entry["attributes"] if "attributes" in entry else [])
-                    for entry in dct["tag_config"]["required"]}
+        new_dict = {}
+        for entry in dct["tag_config"]["required"]:
+            if self.__validate_reqired_tag_config(entry):
+                new_dict[str(entry["tag_name"])] = RequiredTag.RequiredTag(
+                    entry["tag_name"],
+                    entry["is_empty"] if "is_empty" in entry else False,
+                    entry["mapped_name"],
+                    entry["attributes"] if "attributes" in entry else [])
+            else:
+                raise ValueError("Missing tag_name for required tag config entry")
+        return new_dict
 
     def __extract_db_config(self, dct):
         if "database_config" in dct:
@@ -100,6 +105,12 @@ class SdeArchivistProperties:
             else:
                 raise ValueError("Missing log config entry "
                                  "(level, file, log_file_size (bytes), log_file_count (int))")
+
+    def __validate_reqired_tag_config(self, config):
+        valid_config = True
+        if "tag_name" not in config:
+            valid_config = False
+        return valid_config
 
     def __validate_db_config(self, config):
         valid_config = True
