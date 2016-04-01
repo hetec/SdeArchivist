@@ -55,6 +55,7 @@ The archivist_config.json file
         "required" : [
           {
             "tag_name" : "keyword "
+            "mapped_name" : "New name for keyword"
           },
           {
             "tag_name" : "CharSetCd",

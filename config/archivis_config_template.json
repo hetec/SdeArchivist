@@ -54,7 +54,7 @@
       },
       {
         "tag_name" : "CharSetCd",
-        "mapped_name" : "",
+        "mapped_name" : "The new name",
         "is_empty" : true,
         "attributes" : ["value"]
       },

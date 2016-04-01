@@ -49,6 +49,7 @@ def handle_process_failure(cont_id,
     try:
         meta_data_service.delete_by_id(req_id)
         meta_data_service.update_state(cont_id, message)
+        meta_data_service.update_name(cont_id, "Not Set")
         console_logger.error(str(error))
         file_logger.error(str(error))
     except Exception as e:
@@ -277,6 +278,7 @@ if __name__ == "__main__":
                 try:
                     meta_data_service.delete_by_id(request_table_id)
                     meta_data_service.update_state(content_table_id, "INVALID META DATA")
+                    meta_data_service.update_name(content_table_id, "Not Set")
                 except Exception as e:
                     handle_process_failure(content_table_id, request_table_id, e,
                                            "CORRUPT (NOT ABLE TO SET STATE)",
@@ -285,7 +287,7 @@ if __name__ == "__main__":
                 # Send a mail to inform about the invalid metadata
                 out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
                 # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out, FAILURE_MAIL_STATE)
-                ms.send("patrick.hebner@ufz.de", "FAILED! Your meta data are invalid: \n\n" + out, FAILURE_MAIL_STATE)
+                ms.send("patrick.hebner@ufz.de", "FAILED! The meta data of '" + str(xml) + "' are invalid: \n\n" + out, FAILURE_MAIL_STATE)
                 #print out
 
             # Remove the buffered file
