@@ -12,8 +12,8 @@ class RequiredTag:
         Creates a new RequiredTag object
 
         :param tag_name: The name of the tag (String)
-        :param attributes: The required attributes of this tag
-        :param mapped_name: If populated this name is used instead of the xml tag name
+        :param attributes: The required attributes of this tag (List)
+        :param mapped_name: If populated this name is used instead of the xml tag name (String)
         :param is_empty: Defines if a tag has content or not (Boolean, Default: False)
         :return: New RequiredTag object
         """
@@ -47,4 +47,9 @@ class RequiredTag:
         return self.__is_empty_tag
 
     def attributes(self):
+        """
+        Returns a copy of the attributes
+
+        :return: (List)
+        """
         return copy.copy(self.__attributes)

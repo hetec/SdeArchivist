@@ -12,9 +12,9 @@ class XmlWorkspaceExporter:
     def __init__(self, properties, connection_name):
         """
         Creates a new XmlWorkspaceExporter instance
-        :param properties: Properties which must provide the 'project_root'
+
+        :param properties: Properties which must provide the 'project_root' (Map)
         :param connection_name: Name of the connection (String)
-        :return: new XmlWorkspaceExporter instance
         """
         self.__base_path = properties["project_root"]
         self.__connection_name = connection_name
@@ -30,8 +30,8 @@ class XmlWorkspaceExporter:
         Exports the assigned data as an xmlWorkspaceDocument
 
         - Includes the data and the meta data if existing
+
         :param data: The name of the SDE DataSet. Must be exportable as xmlWorkspaceDocument (String)
-        :return:
         """
         self.__c_logger.info("EXPORTIERE: " + str(data))
         self.__f_logger.info("EXPORTIERE: " + str(data))

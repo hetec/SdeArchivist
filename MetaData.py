@@ -16,7 +16,6 @@ class MetaData:
 
         :param name: The name of the meta date (String)
         :param value: The value of the meta date (String)
-        :return: void
         """
         self.__meta_data[name] = value
 
@@ -31,8 +30,8 @@ class MetaData:
     def set_valid(self, value):
         """
         Declares the related meta data set as valid (or not)
+
         :param value: Value to mark the meta data as valid (Boolean, Default: False)
-        :return: void
         """
         self.__is_valid = value
 

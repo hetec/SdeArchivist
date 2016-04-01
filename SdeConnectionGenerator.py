@@ -12,6 +12,7 @@ class SdeConnectionGenerator:
     def __init__(self, properties, connection_name):
         """
         Creates a new SdeConnectionGenerator instance of a set of properties
+
         :param properties: Properties which are necessary to build a SDE file (Dictionary)
         :param connection_name: Name of the connection (String)
         :return: new SdeConnectionGenerator instance
@@ -54,6 +55,8 @@ class SdeConnectionGenerator:
 
         - If no connection file exists in /config a new one will be created
         - If a connection file exists in /config it will be reused
+
+        :exception SdeException
         """
         self.__c_logger.info("SDE CONNECTION PROPERTIES: \n"
                              + self.__sdeFile + "\n"

@@ -5,8 +5,15 @@ from RotatingFileLogger import RotatingFileLogger
 
 
 class ArchivistLogger:
+    """
+    Factory class to get different logger instances. Supports file and console loggers.
+    """
 
     def __init__(self, log_properties):
+        """
+        Creates new ArchiveLogger instances
+        :param log_properties: The logger config entries (Map)
+        """
         self.__level = log_properties['level']
         self.__file = log_properties['file']
         self.__max_bytes = log_properties['log_file_size']
@@ -15,6 +22,11 @@ class ArchivistLogger:
         self.__rolling_file_logger = None
 
     def get_console_logger(self):
+        """
+        Configures and returns a console logger
+
+        :return: ConsoleLogger
+        """
         if self.__console_logger is None:
             c = ConsoleLogger()
             f = c.get_formatter()
@@ -25,6 +37,11 @@ class ArchivistLogger:
             return self.console_logger
 
     def get_file_logger(self):
+        """
+        Configures and returns a file logger
+
+        :return: RotatingFileLogger
+        """
         if self.__rolling_file_logger is None:
             a = RotatingFileLogger()
             f = a.get_formatter()
@@ -33,11 +50,3 @@ class ArchivistLogger:
             return self.__rolling_file_logger
         else:
             return self.__rolling_file_logger
-
-
-if __name__ == "__main__":
-
-    pass
-
-    # p = SdeArchivistProperties.SdeArchivistProperties("config/archivist_config.json").log_config
-    # a = ArchivisLogger(p)

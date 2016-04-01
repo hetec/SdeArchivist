@@ -17,7 +17,7 @@ class SdeArchivistProperties:
             mail_config (Dictionary)
             sde_config (Dictionary)
 
-        :param ref: The location of the 'archivist_config.json' configuration file
+        :param ref: The location of the 'archivist_config.json' configuration file (String)
         :return: new SdeArchivistProperties instance
         """
         self.__config = ""

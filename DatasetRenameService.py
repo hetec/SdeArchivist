@@ -16,7 +16,7 @@ class DatasetRenameService:
 
         :param archiveProperties: A map with the property data for the sde archive
         :param existenceValidator: An existence validator instance
-        :return:
+        :return: Name with counter (String)
         """
         self.__path = archiveProperties["project_root"] + "/config/sdearchive.sde/"
         self.__validator = existenceValidator
@@ -36,7 +36,7 @@ class DatasetRenameService:
 
         :param data: The name of the data without an extension -> USER.dataname
         :return: The new name
-        :except: Throws Renaming Exception
+        :exception: Throws Renaming Exception
         """
         old_name = "SDE." + data.split(".")[1]
         self.__c_logger.debug("Old dataset name in sde archive: " + old_name)

@@ -10,9 +10,10 @@ class LdapService:
     def __init__(self, properties):
         """
         Creates a LdapSever instance
+
         :param properties: Properties to connect to the ldap server (Dictionary)
         :return: New LdapService object
-        :raises: Exception if an error occurs while connecting to ldap
+        :exception: Exception if an error occurs while connecting to ldap
         """
         self.__props = properties
         try:
@@ -21,7 +22,7 @@ class LdapService:
             raise Exception("Not able to connect to " + self.__props["server"] + ": " + str(e.message))
 
     def set_console_logger(self, console_logger):
-            self.__c_logger = console_logger
+        self.__c_logger = console_logger
 
     def set_file_logger(self, file_logger):
         self.__f_logger = file_logger
@@ -29,9 +30,10 @@ class LdapService:
     def get_email_by_uid(self, uid):
         """
         Finds a email address by a given uid
+
         :param uid: The ldap name of the user (String)
         :return: Email (String)
-        :raises: Exception if an error occurs while connecting to ldap
+        :exception: Exception if an error occurs while connecting to ldap
         """
         try:
             res = self.__ldapObj.search_s(self.__props["dn"],ldap.SCOPE_SUBTREE,"uid=" + uid)

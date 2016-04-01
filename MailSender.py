@@ -13,7 +13,7 @@ class MailSender:
         """
         Creates a pre-configured instance
 
-        :param properties: The mail configuration data
+        :param properties: The mail configuration data (Map)
         """
         self.__props = properties
         #only ascii for the server and port
@@ -24,6 +24,7 @@ class MailSender:
     def set_console_logger(self, console_logger):
         """
         Set a console logger
+
         :param console_logger: A logger instance
         """
         self.__c_logger = console_logger
@@ -31,6 +32,7 @@ class MailSender:
     def set_file_logger(self, file_logger):
         """
         Set a file logger
+
         :param file_logger: A logger instance
         """
         self.__f_logger = file_logger
@@ -40,9 +42,10 @@ class MailSender:
         Send a email to a defined recipient. If 'get_user_process_info'
         is enabled in the config file the email is also send to the configured
         list of admins
-        :param to: recipient
-        :param content: The message which is displayed after the default message configured in the config file
-        :param msg_type: Success or failure
+
+        :param to: recipient (String)
+        :param content: The message which is displayed after the default message configured in the config file (String)
+        :param msg_type: Success or failure (String)
         """
         try:
             self.__c_logger.debug("Mail connection: " +
@@ -66,8 +69,9 @@ class MailSender:
 
     def send_to_admin(self, content):
         """
-        Sends an email to the configured list of admins.
-        :param content: The main message of the email. Displayed after a predefined default message.
+        Sends an email to the configured list of admins
+
+        :param content: The main message of the email. Displayed after a predefined default message. (String)
         """
         try:
             self.__c_logger.debug("Mail connection: " +
@@ -92,10 +96,11 @@ class MailSender:
         """
         Constructs a message body from a given content and a configured default message.
         Sets also the SUBJECT and the FROM fields.
-        :param to: recipient
-        :param content: The main message
-        :param msg_type: Success or Failure
-        :return: The message as string
+
+        :param to: recipient (String)
+        :param content: The main message (String)
+        :param msg_type: Success or Failure (String)
+        :return: The message as string (String)
         """
         msg = multipart.MIMEMultipart()
         msg["FROM"] = self.__props["from"]
@@ -121,8 +126,3 @@ class MailSender:
         msg.attach(mimetext.MIMEText(body, "plain"))
 
         return msg.as_string()
-
-
-if __name__ == "__main__":
-
-    pass

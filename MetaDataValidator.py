@@ -16,7 +16,7 @@ class MetaDataValidator:
 
         :param xml: The data to check (XML as String)
         :param required_tags: The required meta data (List of MetaData objects)
-        :return: New MetaDataValidator object
+        :return: New MetaDataValidator object (MetaData)
         """
         self.__xml = xml
         self.__required_tags = required_tags
@@ -31,7 +31,7 @@ class MetaDataValidator:
         """
         Starts the validation process on the data specified on the creation of the validator
 
-        :param meta_data: The meta data container which gets filled during the validation.
+        :param meta_data: The meta data container which gets filled during the validation. (MetaData)
         """
         self.__c_logger.info("START VALIDATION")
         self.__f_logger.info("START VALIDATION")

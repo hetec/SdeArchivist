@@ -23,6 +23,22 @@ Welcome to SdeArchivist's documentation!
    MetaDataService
    datasetRenameService
    mailSender
+   ArchivistLogger
+   BufferCleaner
+   ConsoleLogger
+   GenericLogger
+   ExistenceValidator
+   LdapService
+   MetaData
+   MetaDataValidator
+   MetaDataRenderer
+   OracleConnection
+   RotatingFileLogger
+   SdeArchivistProperties
+   SdeConnectionGenerator
+   RequiredTag
+   XmlWorkspaceExporter
+   XmlWorkspaceImporter
 
 
 Indices and tables

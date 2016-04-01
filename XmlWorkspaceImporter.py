@@ -4,8 +4,18 @@ from XmlImportException import XmlImportException
 
 
 class XmlWorkspaceImporter:
+    """
+    Imports the a given XML Workspace Document into a specified ArcSDE schema
+    """
 
     def __init__(self, properties, connection_name):
+        """
+        Creates and configures a XmlWorkspaceImporter instance
+
+        :param properties: Properties for the sde archive ArcSDE schema (Map)
+        :param connection_name: Name of the connection file (String)
+        """
+
         self.__base_path = properties["project_root"]
         self.__sde_file = self.__base_path + "/config/" + connection_name + ".sde"
         self.__data = self.__base_path + "/buffer/"
@@ -17,6 +27,13 @@ class XmlWorkspaceImporter:
         self.__f_logger = file_logger
 
     def archive(self, data_name):
+        """
+        Archives the given XML file
+
+        :param data_name: Name of the XML file (String)
+        :exception: XmlImportException
+        """
+
         self.__c_logger.info("IMPORT PROPERTIES: \n"
                              + self.__sde_file + "\n"
                              + self.__data)

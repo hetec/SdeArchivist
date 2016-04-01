@@ -40,11 +40,12 @@ def handle_process_failure(cont_id,
     """
     Handles unexpected situations by updating the request and content tables
     and sending status mails
-    :param cont_id: Id of the related row in the content table
-    :param req_id: Id of the related row in the request table
-    :param error: The error object
-    :param message: Custom error message
-    :param mailSender: MailSender object
+
+    :param cont_id: Id of the related row in the content table (Integer)
+    :param req_id: Id of the related row in the request table (Integer)
+    :param error: The error object (Exception)
+    :param message: Custom error message (String)
+    :param mailSender: MailSender object (MailSender)
     """
     try:
         meta_data_service.delete_by_id(req_id)
@@ -64,14 +65,13 @@ def handle_process_failure(cont_id,
 
     mailSender.send("patrick.hebner@ufz.de", str(error), FAILURE_MAIL_STATE)
 
-    #print str(error)
-
 
 def inform_admin(message, mailSender):
     """
     Send an email to the configured admin/s
-    :param message: content of the email
-    :param mailSender: MailSender instance
+
+    :param message: content of the email (String)
+    :param mailSender: MailSender instance (MailSender)
     """
     mailSender.send_to_admin(str(message))
 
@@ -81,7 +81,7 @@ def check_project_structure(validator):
     Checks if the necessary directories (config, buffer) and the
     config file exist in the right location
 
-    :param validator: validator instance
+    :param validator: validator instance (ExistenceValidator)
     """
     buffer_exists = existenceValidator.directory_exists(BUFFER_DIR)
     config_exists = existenceValidator.directory_exists(CONFIG_DIR)

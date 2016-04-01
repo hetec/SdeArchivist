@@ -6,7 +6,7 @@ from ExistenceException import ExistenceException
 
 class ExistenceValidator:
     """
-    Verifies the existence of files
+    Verifies the existence of files and directories
     """
 
     def __init__(self,):
@@ -19,6 +19,12 @@ class ExistenceValidator:
         self.__f_logger = file_logger
 
     def directory_exists(self, dir):
+        """
+        Checks if a given directory exists
+
+        :param dir: The directory name
+        :return: (Boolean)
+        """
         path = os.path.abspath(dir)
         self.__c_logger.debug(str(dir) + " exists: " + str(os.path.exists(path)))
         self.__f_logger.debug(str(dir) + " exists: " + str(os.path.exists(path)))
@@ -27,6 +33,7 @@ class ExistenceValidator:
     def buffered_xml_exists(self, file_name):
         """
         Checks if a given file exists in the buffer folder
+
         :param file_name: The file to verify (String)
         :return: (Boolean)
         """
@@ -38,6 +45,7 @@ class ExistenceValidator:
     def config_file_exists(self, file_name):
         """
         Checks if a given file exists in the config folder
+
         :param file_name: The file to verify (String)
         :return: (Boolean)
         """
@@ -49,6 +57,7 @@ class ExistenceValidator:
     def imported_sde_data_exists(self, connection_name, file_name):
         """
         Checks if a given file exists in the sde database
+
         :param file_name: The file to verify (String)
         :return: (Boolean)
         """
@@ -64,9 +73,4 @@ class ExistenceValidator:
             self.__f_logger.exception("EXCEPTION while checking the excistence of " + connection_name
                                       + "Missing connection file in the config folder")
             raise ExistenceException("Missing connection file in the config folder")
-
-
-if __name__ == "__main__":
-    validator = ExistenceValidator()
-    print(validator.imported_sde_data_exists("sde", "SDE.alles"))
 

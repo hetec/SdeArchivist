@@ -5,7 +5,6 @@ import cx_Oracle
 class OracleConnection:
     """
     Establishes and returns a connection to the defined oracle database.
-
     For each call of connection() a new connection is established.
     Lazy initialization and reusing of a created connection object
     is ignored since the connection object will be used just once
@@ -23,6 +22,7 @@ class OracleConnection:
     def connection(self):
         """
         Returns a connection to the defined oracle database
+
         :return: cx_Oracle connection object
         """
         try:

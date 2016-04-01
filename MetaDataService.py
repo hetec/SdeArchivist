@@ -22,6 +22,7 @@ class MetaDataService:
     def set_console_logger(self, console_logger):
         """
         Set the console logger
+
         :param console_logger: logger instance
         """
         self.__c_logger = console_logger
@@ -29,6 +30,7 @@ class MetaDataService:
     def set_file_logger(self, file_logger):
         """
         Set the file logger
+
         :param file_logger: logger instance
         """
         self.__f_logger = file_logger
@@ -36,6 +38,7 @@ class MetaDataService:
     def find_all_requests(self):
         """
         Queries all dataset names by the names in the ArcGIS requests table
+
         :return: Names (List)
         :exception: DataException
         """
@@ -62,6 +65,7 @@ class MetaDataService:
     def find_meta_data_by_dataset_names(self):
         """
         Queries all xml meta data clobs by the names in the ArcGIS requests table
+
         :return: Meta data (Dictionary)
         :exception: DataException
         """
@@ -96,6 +100,7 @@ class MetaDataService:
         """
         Queries the maximum id value in the content table. If no entries are
         available the id will be set to 1
+
         :return: ID (Integer)
         :exception: DataException
         """
@@ -160,9 +165,9 @@ class MetaDataService:
         """
         Add a new process entry to the content table
 
-        :param dataset_name: Name of the archived dataset
-        :param remarks: Notes about the current process state or failure
-        :param org_name: The original dataset name
+        :param dataset_name: Name of the archived dataset (String)
+        :param remarks: Notes about the current process state or failure (String)
+        :param org_name: The original dataset name (String)
         :return: ID of the entry (Integer)
         :exception: DataException
         """
@@ -193,6 +198,7 @@ class MetaDataService:
     def update_state(self, data_id, state):
         """
         Set the state of a row in the content table. The row is found by dataset ID
+
         :param data_id: Id of the related dataset (Integer)
         :param state: The new value of the state column (String)
         :exception: DataException
@@ -216,6 +222,7 @@ class MetaDataService:
     def update_name(self, data_id, name):
         """
         Set the name of a row in the content table. The row is found by dataset ID
+
         :param data_id: Id of the related dataset (Integer)
         :param name: The new value of the state column (String)
         :exception: DataException
@@ -241,6 +248,7 @@ class MetaDataService:
     def delete_by_id(self, data_id):
         """
         Delete a row of the request table by id
+
         :param data_id: Dataset ID (Integer)
         """
         self.__c_logger.info("Delete request from the request table")
@@ -264,7 +272,7 @@ class MetaDataService:
 
     def find_flagged_meta_data(self):
         """
-        Finds alle meta data in the defined oracle database which are marked by a flag
+        Finds all meta data in the defined oracle database which are marked by a flag
 
         :return: Meta data as dictionary {name : meta data xml string}
         """
