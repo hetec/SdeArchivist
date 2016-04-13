@@ -300,39 +300,37 @@ if __name__ == "__main__":
             if content_table_id == -1:
                 continue
 
-            # content_table_id = -1
-            # try:
-            #     console_logger.debug("Update state of the entry in the content table")
-            #     file_logger.debug("Update state of the entry in the content table")
-            #     content_table_id = meta_data_service.add_process(xml, "STARTED", xml)
-            # except Exception as e:
-            #     inform_admin(e, ms)
-            #     handle_process_failure(content_table_id, request_table_id, e, "FAILED, INTERNAL ERROR", ms)
-            #     continue
-
             # Verify the current meta data against the required tags specified in the config file
             console_logger.info(STEP4)
             file_logger.info(STEP4)
+
             # Meta data object to hold information about the current meta data
             validated_meta = MetaData.MetaData()
+
             # Create the meta data validator
             meta_validator = MetaDataValidator.MetaDataValidator(raw_meta[xml], required_tags)
             meta_validator.set_console_logger(console_logger)
             meta_validator.set_file_logger(file_logger)
+
             # Do the validation and write the results into the meta data container
             meta_validator.validate(validated_meta)
+
             # Ask the meta data object if there are some issues. If not continue.
             if validated_meta.is_valid():
+
                 console_logger.info(STEP5)
                 file_logger.info(STEP5)
+
                 # Try to export the data to a xml workspace document into the buffer directory
                 try:
                     # Create the exporter
                     exporter = xmlWorkspaceExporter.XmlWorkspaceExporter(sdeConf, SDE_SOURCE_DB)
                     exporter.set_console_logger(console_logger)
                     exporter.set_file_logger(file_logger)
+
                     # Do the export
                     exporter.export(xml)
+
                 except Exception as e:
                     handle_process_failure(content_table_id, request_table_id, e, "FAILED, EXPORT ERROR", ms)
                     continue
@@ -341,16 +339,20 @@ if __name__ == "__main__":
                 # data to the read only database schema
                 console_logger.debug("Check the existence of the exported XML")
                 file_logger.debug("Check the existence of the exported XML")
+
                 if existenceValidator.buffered_xml_exists(str(xml) + ".xml"):
                     try:
                         console_logger.info(STEP6)
                         file_logger.info(STEP6)
+
                         # Create the importer
                         importer = XmlWorkspaceImporter.XmlWorkspaceImporter(archive_conf, SDE_ARCHIVE_DB)
                         importer.set_console_logger(console_logger)
                         importer.set_file_logger(file_logger)
+
                         # Do the import
                         importer.archive(str(xml) + XML_EXTENSION)
+
                         # After successfully importing the data remove the entry in the request table and update
                         # the state of entry in the content table
                         try:
@@ -372,6 +374,7 @@ if __name__ == "__main__":
                 # If the data doesn't exist update the state.
                 console_logger.debug("Check the existence of the imported data")
                 file_logger.debug("Check the existence of the imported data")
+
                 if not existenceValidator.imported_sde_data_exists(SDE_ARCHIVE_DB,
                                                                    SDE_SOURCE_DB + "." + xml.split(".")[1]):
                     handle_process_failure(content_table_id, request_table_id, "The data: " + str(xml) +
@@ -381,9 +384,12 @@ if __name__ == "__main__":
                 else:
                     # Rename the persisted dataset in the archive schema
                     try:
+                        # Create renaming service
                         renameService = DatasetRenameService.DatasetRenameService(archive_conf, existenceValidator)
                         renameService.setConsoleLogger(console_logger)
                         renameService.setFileLogger(file_logger)
+
+                        # rename the xml file
                         xml = renameService.rename(xml)
 
                         # Index the meta data to elasticserach
@@ -394,10 +400,12 @@ if __name__ == "__main__":
                         except Exception as e:
                             inform_admin(e, ms)
 
-                        # Update the name column in the content table to the name after the renaming process
                         try:
+                            # Update the name column in the content table to the name after the renaming process
                             meta_data_service.update_name(content_table_id, xml)
+                            # Send success mail
                             ms.send("patrick.hebner@ufz.de", "SUCCESS", SUCCESS_MAIL_STATE)
+
                             console_logger.info(STEP8)
                             file_logger.info(STEP8)
                         except Exception as e:
@@ -415,7 +423,10 @@ if __name__ == "__main__":
             else:
                 # Update state of the content table for invalid metadata
                 try:
+                    # Delete the request
                     meta_data_service.delete_by_id(request_table_id)
+
+                    # Update state and names
                     meta_data_service.update_state(content_table_id, "INVALID META DATA")
                     meta_data_service.update_name(content_table_id, "Not Set")
                 except Exception as e:
@@ -427,7 +438,6 @@ if __name__ == "__main__":
                 out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
                 # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out, FAILURE_MAIL_STATE)
                 ms.send("patrick.hebner@ufz.de", "FAILED! The meta data of '" + str(xml) + "' are invalid: \n\n" + out, FAILURE_MAIL_STATE)
-                #print out
 
             # Remove the buffered file
             cleaner.clear_file(str(xml) + XML_EXTENSION)

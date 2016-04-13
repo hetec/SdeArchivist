@@ -157,3 +157,11 @@ This means for the validation:
 -
     It is recommended to use qualified paths to identify tags
     else undesired behavior is possible because of equally named tags in the XML (See tag resolution)
+
+
+Known Problems
+--------------
+
+**Error message on saving the request table entries**
+
+Close and reopen ArcGIS. Subsequently connect the request and content table again.
