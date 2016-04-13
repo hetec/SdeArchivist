@@ -107,6 +107,14 @@ STEP8 = '''
 
 '''
 
+STEP9 = '''
+
+***********************************************
+* Handling of duplicate and misspelled values *
+***********************************************
+
+'''
+
 SUCCESS_MAIL_STATE = "success"
 FAILURE_MAIL_STATE = "failure"
 
@@ -168,6 +176,15 @@ def check_project_structure(validator):
     if not buffer_exists or not config_exists or not config_file_exists:
         raise Exception("Invalid project structure!")
 
+
+def get_all_meta_data():
+    data = {}
+    try:
+        data = meta_data_service.find_meta_data_by_dataset_names()
+    except Exception as e:
+        inform_admin("Exception while fetching the meta data for the registered datasets: \n" +
+                     e.message, ms)
+    return data
 
 def get_request_table_id(name, mail_sender):
     reqid = -1
@@ -269,14 +286,14 @@ if __name__ == "__main__":
 
     # Get the meta data for all entries of the request table if they exist in the database
     # Search is based on the data name
-    raw_meta = {}
+    raw_meta = get_all_meta_data()
 
-    try:
-        raw_meta = meta_data_service.find_meta_data_by_dataset_names()
-    except Exception as e:
-        raw_meta = {}
-        inform_admin("Exception while fetching the meta data for the registered datasets: \n" +
-                     e, ms)
+    # try:
+    #     raw_meta = meta_data_service.find_meta_data_by_dataset_names()
+    # except Exception as e:
+    #     raw_meta = {}
+    #     inform_admin("Exception while fetching the meta data for the registered datasets: \n" +
+    #                  e, ms)
 
     # If there are at one or more entries in the database table continue for each meta data entry
     if len(raw_meta) > 0:
@@ -445,6 +462,57 @@ if __name__ == "__main__":
     else:
         console_logger.debug("No meta data found for the entries of the request table")
         file_logger.debug("No meta data found for the entries of the request table")
+
+    # Get the remaining entries of the request table
+    console_logger.info(STEP9)
+    file_logger.info(STEP9)
+
+    # Fetch remaining entries
+    remaining = meta_data_service.find_all_requests()
+
+    if len(remaining) > 0:
+        for entry in remaining:
+            # Get the request table id of the current entry
+            reqid = get_request_table_id(entry, ms)
+
+            exists = False
+            try:
+                # Check if the meta data of the entry are available in the DB
+                exists = meta_data_service.meta_data_exists(entry)
+                console_logger.debug(str(entry) + " is in DB: " + str(exists))
+                file_logger.debug(str(entry) + " is in DB: " + str(exists))
+            except Exception as e:
+                    inform_admin("Exception while checking the existence of remaining datasets: " + str(e), ms)
+
+            # If available -> the entry is a duplicate of an already archived one
+            if exists:
+                console_logger.debug(str(entry) + " = duplicate value")
+                file_logger.debug(str(entry) + " = duplicate value")
+
+                try:
+                    console_logger.debug("Removing " + str(entry))
+                    file_logger.debug("Removing " + str(entry))
+
+                    # Remove the entry
+                    meta_data_service.delete_by_id(reqid)
+                except Exception as e:
+                    handle_process_failure(-1, reqid, e,
+                                           "CORRUPT (NOT ABLE TO UPDATE TABLES)",
+                                           ms)
+            # If not available the entry name is wrong or misspelled
+            else:
+                try:
+                    console_logger.debug(str(entry) + " is misspelled -> updating state")
+                    file_logger.debug(str(entry) + " is misspelled -> updating state")
+
+                    # Add an information to the content table and remove the entry
+                    contid = meta_data_service.add_process(str(entry), "NOT FOUND", str(entry))
+                    meta_data_service.delete_by_id(reqid)
+                except Exception as e:
+                    handle_process_failure(contid, reqid, e,
+                                           "CORRUPT (NOT ABLE TO UPDATE TABLES)",
+                                           ms)
+
 
     # Remove all remaining files from the buffer
     cleaner.clear_all(BUFFER_DIR)

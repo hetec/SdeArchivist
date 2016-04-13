@@ -4,6 +4,7 @@ import cx_Oracle
 from DataException import DataException
 
 
+
 class MetaDataService:
     """
     Service to process several database operations on the
@@ -52,12 +53,43 @@ class MetaDataService:
             result = cur.fetchall()
             list = []
             for r in result:
-                list.append(r)
-            cur.close()
+                list.append(r[0])
             return list
         except cx_Oracle.DatabaseError as e:
             self.__c_logger.exception("EXCEPTION WHILE finding meta data: " + str(e))
             self.__f_logger.exception("EXCEPTION WHILE finding meta data: " + str(e))
+            raise DataException("Error while fetching all datasets: " + str(e))
+        finally:
+            cur.close()
+
+    def meta_data_exists(self, dataset_name):
+        """
+        Checks the existence of meta data by a given dataset name
+
+        :param name: The dataset name (String)
+        :return: (Boolean)
+        """
+        self.__c_logger.info("Check if in DB: " + str(dataset_name))
+        self.__f_logger.info("Check if in DB: " + str(dataset_name))
+        try:
+            query = "SELECT i.NAME " \
+                    "FROM SDE.GDB_ITEMS_VW i LEFT JOIN SDE.GDB_ITEMTYPES t " \
+                    "ON i.Type = t.UUID " \
+                    "WHERE i.NAME = :data_name " \
+                    "AND t.NAME IN ('Feature Dataset', 'Raster Dataset', 'Table', 'Raster Catalog', 'Mosaic Dataset') " \
+                    "AND length(i.DOCUMENTATION) > 1 " \
+                    "AND i.DOCUMENTATION IS NOT NULL "
+
+            cur = self.con.cursor()
+            cur.prepare(query)
+            cur.execute(None, {"data_name": str(dataset_name)})
+            result = cur.fetchall()
+            if len(result) > 0:
+                return True
+            return False
+        except Exception as e:
+            self.__c_logger.exception("EXCEPTION WHILE checking the existence of meta data: " + str(e))
+            self.__f_logger.exception("EXCEPTION WHILE checking the existence of meta data: " + str(e))
             raise DataException("Error while fetching all datasets: " + str(e))
         finally:
             cur.close()
@@ -69,8 +101,8 @@ class MetaDataService:
         :return: Meta data (Dictionary)
         :exception: DataException
         """
-        self.__c_logger.info("Find meta data by dataset name")
-        self.__f_logger.info("Find meta data by dataset name")
+        self.__c_logger.info("Find all meta data by dataset name")
+        self.__f_logger.info("Find all meta data by dataset name")
         try:
             query = "SELECT i.NAME, t.NAME, i.DOCUMENTATION " \
                     "FROM SDE.GDB_ITEMS_VW i LEFT JOIN SDE.GDB_ITEMTYPES t " \
@@ -118,9 +150,9 @@ class MetaDataService:
                 for r in result:
                     dataset_id = r[0]
                     break
-            self.__c_logger.exception("MAX dataset ID in the content table = " + str(dataset_id))
+            self.__c_logger.debug("MAX dataset ID in the content table = " + str(dataset_id))
             if(dataset_id == None):
-                self.__c_logger.exception("No entries in content tabe -> Set id to 0: ID = " + str(dataset_id))
+                self.__c_logger.debug("No entries in content table -> Set id to 0: ID = " + str(dataset_id))
                 dataset_id = 0
             return (dataset_id + 1)
 
