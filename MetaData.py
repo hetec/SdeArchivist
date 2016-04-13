@@ -1,6 +1,6 @@
 # -*- encoding utf-8 -*-
 import copy
-
+import json
 
 class MetaData:
     """
@@ -8,7 +8,17 @@ class MetaData:
     """
     def __init__(self):
         self.__is_valid = True
+        self.__meta_data_info = {}
         self.__meta_data = {}
+
+    def add_meta_data_info(self, name, value):
+        """
+        Adds a meta date as key value pair
+
+        :param name: The name of the meta date (String)
+        :param value: The value of the meta date (String)
+        """
+        self.__meta_data_info[name] = value
 
     def add_meta_data(self, name, value):
         """
@@ -19,6 +29,14 @@ class MetaData:
         """
         self.__meta_data[name] = value
 
+    def meta_data_info(self):
+        """
+        Returns a defensive copy of the contained meta data as dictionary {name:state}
+
+        :return: dictionary with meta data
+        """
+        return copy.copy(self.__meta_data_info)
+
     def meta_data(self):
         """
         Returns a defensive copy of the contained meta data as dictionary {name:state}
@@ -26,6 +44,7 @@ class MetaData:
         :return: dictionary with meta data
         """
         return copy.copy(self.__meta_data)
+
 
     def set_valid(self, value):
         """
@@ -43,14 +62,9 @@ class MetaData:
         """
         return self.__is_valid
 
-
 if __name__ == "__main__":
     meta = MetaData()
     meta.add_meta_data("eins","1")
     meta.add_meta_data("zwei","2")
-    print(meta.meta_data())
-    meta1 = meta.meta_data()
-    print(meta1)
-    meta1["eins"] = "99999"
-    print(meta1)
-    print(meta.meta_data())
+    test = meta.get_json()
+    print test

@@ -41,6 +41,20 @@ class MetaDataValidator:
         self.__c_logger.info("END VALIDATION")
         self.__f_logger.info("END VALIDATION")
 
+
+    def __getContent(self, tag_config, tag_instance, meta_data):
+        if tag_instance.text:
+            print("HAT INHALT")
+            meta_data.add_meta_data(self.__getRightTagName(tag_config), str(tag_instance.text))
+        else:
+            print("HAT KEINEN INHALT")
+            attributes = tag_instance.attrib
+            for attr in tag_config.attributes():
+                print "ATTRIBUTE: " + str(attr)
+                value = attributes[str(attr)]
+                print "VALUE: " + str(value)
+                meta_data.add_meta_data(self.__getRightTagName(tag_config), str(value))
+
     def __validate_attribute(self, attribute_names, tag_name):
         attributes = tag_name.attrib
         missing_attr = []
@@ -85,13 +99,14 @@ class MetaDataValidator:
             self.__f_logger.info("EXISTS: " + tag_name.tag_name() + " (" + str(len(tag_instances)) + ")")
             for tag in tag_instances:
                 msg = self.__validate_not_empty(tag, tag_name)
-                meta_data.add_meta_data(self.__getRightTagName(tag_name), msg)
+                meta_data.add_meta_data_info(self.__getRightTagName(tag_name), msg)
+                self.__getContent(tag_name, tag, meta_data)
                 if msg is not "OK" and meta_data.is_valid() is True:
                     meta_data.set_valid(False)
         else:
             self.__c_logger.info("MISSING: " + tag_name.tag_name())
             self.__f_logger.info("MISSING: " + tag_name.tag_name())
-            meta_data.add_meta_data(self.__getRightTagName(tag_name), "Missing")
+            meta_data.add_meta_data_info(self.__getRightTagName(tag_name), "Missing")
             if meta_data.is_valid() is True:
                 meta_data.set_valid(False)
         return tag_instances
