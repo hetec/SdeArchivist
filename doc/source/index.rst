@@ -6,19 +6,12 @@
 Welcome to SdeArchivist's documentation!
 ========================================
 
-**General Information**
-
-.. toctree::
-   :maxdepth: 2
-
-   Configuration
-   Tags
-
 **Api Documentation**
 
 .. toctree::
-   :maxdepth: 2
+   :numbered:
 
+   general
    SdeArchivist
    MetaDataService
    datasetRenameService
@@ -39,6 +32,8 @@ Welcome to SdeArchivist's documentation!
    RequiredTag
    XmlWorkspaceExporter
    XmlWorkspaceImporter
+   SearchableMetaData
+   DataIndexer
 
 
 Indices and tables
