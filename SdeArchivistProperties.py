@@ -29,6 +29,8 @@ class SdeArchivistProperties:
         self.sde_config = {}
         self.sdearchive_config = {}
         self.ldap_config = {}
+        self.log_config = {}
+        self.elasticsearch_config = {}
         self.__read_config()
 
     def __read_config(self):
@@ -42,6 +44,7 @@ class SdeArchivistProperties:
             self.sde_config = self.__extract_sde_config(self.__config)
             self.sdearchive_config = self.__extract_sdearchive_config(self.__config)
             self.log_config = self.__extract_log_config(self.__config)
+            self.elasticsearch_config = self.__extract_elasitcsearch_config(self.__config)
         finally:
             config_stream.close()
 
@@ -105,6 +108,14 @@ class SdeArchivistProperties:
             else:
                 raise ValueError("Missing log config entry "
                                  "(level, file, log_file_size (bytes), log_file_count (int))")
+
+    def __extract_elasitcsearch_config(self, dct):
+        if "elasticsearch_config" in dct:
+            if self.__validate_elasticsearch_config(dct["elasticsearch_config"]):
+                return dct["elasticsearch_config"]
+            else:
+                raise ValueError("Missing log config entry "
+                                 "(host, index, type")
 
     def __validate_reqired_tag_config(self, config):
         valid_config = True
@@ -221,6 +232,15 @@ class SdeArchivistProperties:
         else:
             raise ValueError("No valid log level! Try debug, info, warn, error or fatal")
 
+    def __validate_elasticsearch_config(self, config):
+        valid_config = True
+        if "host" not in config:
+            valid_config = False
+        if "index" not in config:
+            valid_config = False
+        if "type" not in config:
+            valid_config = False
+        return valid_config
 
 if __name__ == "__main__":
     props = SdeArchivistProperties("config/archivist_config.json")
