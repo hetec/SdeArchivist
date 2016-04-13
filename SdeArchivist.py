@@ -169,6 +169,26 @@ def check_project_structure(validator):
         raise Exception("Invalid project structure!")
 
 
+def get_request_table_id(name, mail_sender):
+    reqid = -1
+    try:
+        reqid = meta_data_service.find_id_by_name(str(name))
+    except Exception as e:
+        inform_admin(e, ms)
+        handle_process_failure(-1, reqid, e, "FAILED, INTERNAL ERROR", mail_sender)
+    return reqid
+
+
+def add_to_content_table(name, reqid, mail_sender):
+    contid = -1
+    try:
+        contid = meta_data_service.add_process(str(name), "STARTED", str(name))
+    except Exception as e:
+        inform_admin(e, ms)
+        handle_process_failure(contid, reqid, e, "FAILED, INTERNAL ERROR", mail_sender)
+    return contid
+
+
 if __name__ == "__main__":
 
     # Get config from config/archivist_config.json
@@ -263,27 +283,32 @@ if __name__ == "__main__":
         console_logger.info(STEP3)
         file_logger.info(STEP3)
         for xml in raw_meta:
+
+            # Get the id of the row in the request table
             console_logger.debug("Fetch the ID of the current entry")
             file_logger.debug("Fetch the ID of the current entry")
-            # Get the id of the row in the request table
-            request_table_id = -1
-            try:
-                request_table_id = meta_data_service.find_id_by_name(str(xml))
-            except Exception as e:
-                inform_admin(e, ms)
-                handle_process_failure(-1, request_table_id, e, "FAILED, INTERNAL ERROR", ms)
+
+            request_table_id = get_request_table_id(xml, ms)
+            if request_table_id == -1:
                 continue
 
             # Add the current process to the content table and get the assigned id
-            content_table_id = -1
-            try:
-                console_logger.debug("Update state of the entry in the content table")
-                file_logger.debug("Update state of the entry in the content table")
-                content_table_id = meta_data_service.add_process(xml, "STARTED", xml)
-            except Exception as e:
-                inform_admin(e, ms)
-                handle_process_failure(content_table_id, request_table_id, e, "FAILED, INTERNAL ERROR", ms)
+            console_logger.debug("Update state of the entry in the content table")
+            file_logger.debug("Update state of the entry in the content table")
+
+            content_table_id = add_to_content_table(xml, request_table_id, ms)
+            if content_table_id == -1:
                 continue
+
+            # content_table_id = -1
+            # try:
+            #     console_logger.debug("Update state of the entry in the content table")
+            #     file_logger.debug("Update state of the entry in the content table")
+            #     content_table_id = meta_data_service.add_process(xml, "STARTED", xml)
+            # except Exception as e:
+            #     inform_admin(e, ms)
+            #     handle_process_failure(content_table_id, request_table_id, e, "FAILED, INTERNAL ERROR", ms)
+            #     continue
 
             # Verify the current meta data against the required tags specified in the config file
             console_logger.info(STEP4)
