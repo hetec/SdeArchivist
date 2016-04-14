@@ -13,6 +13,10 @@ class FailedIndexingCacheTest(unittest.TestCase):
 
     def tearDown(self):
         self.cache = None
+        try:
+            os.remove("./test.cache")
+        except:
+            print "no file"
 
     def test_reading_particular_written_lines_from_cache_multiple_lines_returns_list_of_these_lines(self):
         self.cache.write_to_cache("Test line one")

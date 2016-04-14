@@ -1,11 +1,12 @@
 # -*- encoding utf-8 -*-
+import os
 
 class FailedIndexingCache:
     """
     File cache to hold failed indexing trials. These stored information can be
     reused to index the failed data on a new run of the script
     """
-    def __init__(self, cache_file="failed_indexing.cache"):
+    def __init__(self, cache_file="config/failed_indexing.cache"):
         """
         Creates a predefined cache
 
@@ -35,15 +36,16 @@ class FailedIndexingCache:
 
         :return: (List)
         """
-        file_con = None
-        try:
-            file_con = open(self.__CACHE_FILE, 'r')
-            entries = file_con.readlines()
-            return entries
-        except Exception as e:
-            raise EnvironmentError("Cannot write to cache: " + str(e))
-        finally:
-            file_con.close()
+        if os.path.isfile(self.__CACHE_FILE):
+            file_con = None
+            try:
+                file_con = open(self.__CACHE_FILE, 'r')
+                entries = file_con.readlines()
+                return entries
+            except Exception as e:
+                raise EnvironmentError("Cannot write to cache: " + str(e))
+            finally:
+                file_con.close()
 
     def clear_cache(self):
         """

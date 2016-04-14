@@ -21,6 +21,8 @@ import xmlWorkspaceExporter
 import DatasetRenameService
 from OracleConnection import OracleConnection
 from DataIndexer import DataIndexer
+from IndexRepeater import IndexRepeater
+from FailedIndexingCache import FailedIndexingCache
 
 # Do not change this in the rest of the code!
 SDE_SOURCE_DB = "sde"
@@ -276,10 +278,17 @@ if __name__ == "__main__":
     # Get the elasticsearch config
     elastic_config = props.elasticsearch_config
 
+
+
     # Initialize the data indexer
     indexer = DataIndexer(elastic_config)
     indexer.set_console_logger(console_logger)
     indexer.set_file_logger(file_logger)
+
+    console_logger.info("REINDEXING")
+    file_logger.info("REINDEXING")
+
+    IndexRepeater(FailedIndexingCache(), indexer).reindex()
 
     console_logger.info(STEP2)
     file_logger.info(STEP2)
@@ -300,6 +309,21 @@ if __name__ == "__main__":
         console_logger.info(STEP3)
         file_logger.info(STEP3)
         for xml in raw_meta:
+
+            console_logger.info("""
+            >
+            >>>
+            >>>>> Processing entry: str(xml)
+            >>>
+            >
+            """)
+            file_logger.debug(console_logger.info("""
+            >
+            >>>
+            >>>>> Processing entry: str(xml)
+            >>>
+            >
+            """))
 
             # Get the id of the row in the request table
             console_logger.debug("Fetch the ID of the current entry")
@@ -501,6 +525,7 @@ if __name__ == "__main__":
                                            ms)
             # If not available the entry name is wrong or misspelled
             else:
+                contid = -1
                 try:
                     console_logger.debug(str(entry) + " is misspelled -> updating state")
                     file_logger.debug(str(entry) + " is misspelled -> updating state")
