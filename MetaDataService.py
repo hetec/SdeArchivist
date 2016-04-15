@@ -119,6 +119,7 @@ class MetaDataService:
             result = cur.fetchall()
             metas = {}
             for r in result:
+                self.__c_logger.exception("DATASET FOUND ==> " + str(r))
                 metas[r[0]] = r[2].read()
             return metas
         except cx_Oracle.DatabaseError as e:

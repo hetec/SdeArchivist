@@ -64,8 +64,8 @@ class MailSender:
             self.__c_logger.info("Send mail to " + str(tos_addr))
             self.__f_logger.info("Send mail to " + str(tos_addr))
         except Exception as e:
-            self.__c_logger.exception("Unable to send emails.")
-            self.__f_logger.exception("Unable to send emails.")
+            self.__c_logger.exception("Unable to send emails with: " + str(self.__props["username"]) + ", " + str(self.__props["password"]))
+            self.__f_logger.exception("Unable to send emails with: " + str(self.__props["username"]) + ", " + str(self.__props["password"]))
 
     def send_to_admin(self, content):
         """

@@ -29,7 +29,7 @@ Welcome to SdeArchivist's documentation!
    RotatingFileLogger
    SdeArchivistProperties
    SdeConnectionGenerator
-   RequiredTag
+   MetaDataTag
    XmlWorkspaceExporter
    XmlWorkspaceImporter
    SearchableMetaData

@@ -1,7 +1,7 @@
 # -*- encoding utf-8 -*-
 import io
 import json
-import RequiredTag
+import MetaDataTag
 import logging
 
 
@@ -50,11 +50,12 @@ class SdeArchivistProperties:
 
     def __extract_tag_config(self, dct):
         new_dict = {}
-        for entry in dct["tag_config"]["required"]:
+        for entry in dct["tag_config"]["tags"]:
             if self.__validate_reqired_tag_config(entry):
-                new_dict[str(entry["tag_name"])] = RequiredTag.RequiredTag(
+                new_dict[str(entry["tag_name"])] = MetaDataTag.MetaDataTag(
                     entry["tag_name"],
                     entry["is_empty"] if "is_empty" in entry else False,
+                    entry["optional"] if "optional" in entry else False,
                     entry["mapped_name"],
                     entry["attributes"] if "attributes" in entry else [])
             else:

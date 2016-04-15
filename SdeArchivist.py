@@ -310,20 +310,8 @@ if __name__ == "__main__":
         file_logger.info(STEP3)
         for xml in raw_meta:
 
-            console_logger.info("""
-            >
-            >>>
-            >>>>> Processing entry: str(xml)
-            >>>
-            >
-            """)
-            file_logger.debug(console_logger.info("""
-            >
-            >>>
-            >>>>> Processing entry: str(xml)
-            >>>
-            >
-            """))
+            console_logger.info("\n>>> PROCESSING " + str(xml) + " <<<\n")
+            file_logger.debug("\n>>> PROCESSING " + str(xml) + " <<<\n")
 
             # Get the id of the row in the request table
             console_logger.debug("Fetch the ID of the current entry")

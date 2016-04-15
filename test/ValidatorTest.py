@@ -1,6 +1,6 @@
 import unittest
 from MetaDataValidator import MetaDataValidator
-from RequiredTag import RequiredTag
+from MetaDataTag import MetaDataTag
 from MetaData import MetaData
 from mock import MagicMock
 import logging
@@ -11,18 +11,17 @@ class ValidationTest(unittest.TestCase):
     c_logger = logging.getLogger("mock")
     f_logger = logging.getLogger("mock")
 
-    #tag1 = RequiredTag("dataIdInfo/dataChar/CharSetCd", True, "Resource/Details/Character Set", ["value"])
-    tag_not_empty_mapped = RequiredTag("test1", False, "mapped1")
-    tag_not_empty_not_mapped = RequiredTag("test2", False)
-    tag_empty_not_mapped = RequiredTag("test3", True)
-    tag_empty_mapped = RequiredTag("test4", True, "mapped4")
-    tag_empty_attribute = RequiredTag("test5", True, mapped_name="", attributes=["attr51", "attr52"])
-    tag_not_empty_attribute = RequiredTag("test6", False, mapped_name="", attributes=["attr6"])
-    unique_nest_tag_not_empty = RequiredTag("unique_inner", False, mapped_name="")
-    multi_nest_tag_not_empty_1 = RequiredTag("multi_inner", False, mapped_name="")
-    multi_nest_tag_not_empty_2 = RequiredTag("multi_inner", False, mapped_name="")
-    multi_nest_tag_not_empty_path1 = RequiredTag("test7/multi_inner", False, mapped_name="")
-    multi_nest_tag_not_empty_path2 = RequiredTag("test8/multi_inner", False, mapped_name="")
+    tag_not_empty_mapped = MetaDataTag("test1", False, "mapped1")
+    tag_not_empty_not_mapped = MetaDataTag("test2", False)
+    tag_empty_not_mapped = MetaDataTag("test3", True)
+    tag_empty_mapped = MetaDataTag("test4", True, "mapped4")
+    tag_empty_attribute = MetaDataTag("test5", True, mapped_name="", attributes=["attr51", "attr52"])
+    tag_not_empty_attribute = MetaDataTag("test6", False, mapped_name="", attributes=["attr6"])
+    unique_nest_tag_not_empty = MetaDataTag("unique_inner", False, mapped_name="")
+    multi_nest_tag_not_empty_1 = MetaDataTag("multi_inner", False, mapped_name="")
+    multi_nest_tag_not_empty_2 = MetaDataTag("multi_inner", False, mapped_name="")
+    multi_nest_tag_not_empty_path1 = MetaDataTag("test7/multi_inner", False, mapped_name="")
+    multi_nest_tag_not_empty_path2 = MetaDataTag("test8/multi_inner", False, mapped_name="")
 
     x = '''
     <root>

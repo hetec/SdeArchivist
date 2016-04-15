@@ -158,6 +158,10 @@ This means for the validation:
     It is recommended to use qualified paths to identify tags
     else undesired behavior is possible because of equally named tags in the XML (See tag resolution)
 
+Data Types
+----------
+
+Achievable data types: 'Feature Dataset', 'Raster Dataset', 'Table', 'Raster Catalog', 'Mosaic Dataset'
 
 Known Problems
 --------------
