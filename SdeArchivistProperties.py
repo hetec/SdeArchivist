@@ -56,7 +56,7 @@ class SdeArchivistProperties:
                     entry["tag_name"],
                     entry["is_empty"] if "is_empty" in entry else False,
                     entry["optional"] if "optional" in entry else False,
-                    entry["mapped_name"],
+                    entry["mapped_name"] if "mapped_name" in entry else entry["tag_name"],
                     entry["attributes"] if "attributes" in entry else [])
             else:
                 raise ValueError("Missing tag_name for required tag config entry")

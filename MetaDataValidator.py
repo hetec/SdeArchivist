@@ -41,7 +41,6 @@ class MetaDataValidator:
         self.__c_logger.info("END VALIDATION")
         self.__f_logger.info("END VALIDATION")
 
-
     def __getContent(self, tag_config, tag_instance, meta_data):
         if tag_instance.text:
             print("HAS CONTENT")
@@ -96,9 +95,14 @@ class MetaDataValidator:
         self.__f_logger.info("Fetch tags from the meta data xml")
         root = etree.fromstring(self.__xml)
         tag_instances = root.findall(".//" + tag_name.tag_name())
+        self.__c_logger.info("TAG EXISTS: " + tag_name.tag_name() + " (" + str(len(tag_instances)) + ")")
+        self.__f_logger.info("TAG EXISTS: " + tag_name.tag_name() + " (" + str(len(tag_instances)) + ")")
+        # Check if the tag is optional
+        # If true return immediately
+        optional = self.__handle_optional_tags(tag_name, meta_data, tag_instances)
+        if optional:
+                return tag_instances
         if tag_instances:
-            self.__c_logger.info("TAG EXISTS: " + tag_name.tag_name() + " (" + str(len(tag_instances)) + ")")
-            self.__f_logger.info("TAG EXISTS: " + tag_name.tag_name() + " (" + str(len(tag_instances)) + ")")
             for tag in tag_instances:
                 msg = self.__validate_not_empty(tag, tag_name)
                 meta_data.add_meta_data_info(self.__getRightTagName(tag_name), msg)
@@ -137,6 +141,24 @@ class MetaDataValidator:
             if len(attr_check) > 0:
                 return attr_check
         return "OK"
+
+    def __handle_optional_tags(self, tag, meta_data, instances):
+        if tag.is_optional():
+            for instance in instances:
+                self.__c_logger.info("IS OPTIONAL: " + tag.tag_name())
+                self.__f_logger.info("IS OPTIONAL: " + tag.tag_name())
+                # Add OK to the meta data because optional tags are always considered as valid
+                meta_data.add_meta_data_info(self.__getRightTagName(tag), "OK")
+                # Get the content for the optional tag
+                self.__getContent(tag, instance, meta_data)
+            return True
+        else:
+            self.__c_logger.info("IS MANDATORY: " + tag.tag_name())
+            self.__f_logger.info("IS MANDATORY: " + tag.tag_name())
+            return False
+
+
+
 
     def __getRightTagName(self, tag):
         if not tag.mapped_name():

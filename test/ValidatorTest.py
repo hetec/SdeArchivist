@@ -107,6 +107,18 @@ class ValidationTest(unittest.TestCase):
         validator.validate(meta)
         self.assertEqual(meta.is_valid(), True, "Invalid tags")
 
+    def test_validate_mappedTagsWithAttributes_metaDataHasTheRightContent(self):
+        tags = {"test1": self.tag_not_empty_mapped,
+                "test5": self.tag_empty_attribute}
+        validator = MetaDataValidator(self.x, tags)
+        validator.set_console_logger(self.c_logger)
+        validator.set_file_logger(self.f_logger)
+
+        meta = MetaData()
+        validator.validate(meta)
+        self.assertEqual(meta.is_valid(), True, "Invalid tags")
+        #should_exist = [""]
+
 
 if __name__ == "__main__":
     unittest.main()

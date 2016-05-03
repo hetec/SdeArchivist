@@ -40,6 +40,11 @@
     "success_subject" : "",
     "default_message" : ""
   },
+  "elasticsearch_config": {
+    "host": "",
+    "index": "",
+    "type": ""
+  },
   "log_config" : {
     "level" : "",
     "file" : "",
@@ -47,7 +52,7 @@
     "log_file_count" : 3
   },
   "tag_config" : {
-    "required" : [
+    "tags" : [
       {
         "tag_name" : "keyword",
         "mapped_name" : ""
@@ -59,10 +64,11 @@
         "attributes" : ["value"]
       },
       {
-         "tag_name" : "dataIdInfo/dataLang/languageCode",
-         "mapped_name" : "",
-         "is_empty" : true,
-         "attributes" : ["value"]
+       "tag_name" : "dataIdInfo/dataLang/languageCode",
+       "mapped_name" : "",
+       "is_empty" : true,
+       "attributes" : ["value"],
+       "optional" : false
       }
 
     ]
