@@ -23,6 +23,7 @@ from OracleConnection import OracleConnection
 from DataIndexer import DataIndexer
 from IndexRepeater import IndexRepeater
 from FailedIndexingCache import FailedIndexingCache
+from UserService import UserService
 
 # Do not change this in the rest of the code!
 SDE_SOURCE_DB = "sde"
@@ -246,6 +247,12 @@ if __name__ == "__main__":
     ora_con.set_file_logger(file_logger)
     connection = ora_con.connection()
 
+    # Get oracle database connection
+    archive_ora_con = OracleConnection(props.archive_database_config)
+    archive_ora_con.set_console_logger(console_logger)
+    archive_ora_con.set_file_logger(file_logger)
+    archive_connection = archive_ora_con.connection()
+
     # Establish ldap connection
     ldap = LdapService.LdapService(props.ldap_config)
     ldap.set_file_logger(file_logger)
@@ -275,10 +282,13 @@ if __name__ == "__main__":
     meta_data_service.set_console_logger(console_logger)
     meta_data_service.set_file_logger(file_logger)
 
+    # Create user service
+    user_service = UserService(archive_connection)
+    user_service.set_console_logger(console_logger)
+    user_service.set_file_logger(file_logger)
+
     # Get the elasticsearch config
     elastic_config = props.elasticsearch_config
-
-
 
     # Initialize the data indexer
     indexer = DataIndexer(elastic_config)
@@ -437,6 +447,10 @@ if __name__ == "__main__":
 
                             console_logger.info(STEP8)
                             file_logger.info(STEP8)
+
+                            print "CREATE USER"
+                            user_service.create_user("myuser", "test")
+
                         except Exception as e:
                             handle_process_failure(content_table_id, request_table_id, e,
                                                    "CORRUPT (NOT ABLE TO SET NAME)",

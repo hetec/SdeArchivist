@@ -158,8 +158,6 @@ class MetaDataValidator:
             return False
 
 
-
-
     def __getRightTagName(self, tag):
         if not tag.mapped_name():
             print "No mapped name: " + tag.tag_name()

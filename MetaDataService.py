@@ -326,24 +326,3 @@ class MetaDataService:
             metas[r[0]] = r[2].read()
         cur.close()
         return metas
-
-    def create_user(self, username):
-        """
-        Todo
-
-        """
-        query = "CREATE USER :user IDENTIFIED BY :pw DEFAULT TABLESPACE USERS;"
-
-        try:
-            cur = self.con.cursor()
-            cur.prepare(query)
-            cur.execute(None, {'user': str(username), 'pw': "test"})
-            self.con.commit()
-
-        except cx_Oracle.DatabaseError as e:
-            self.con.rollback()
-            self.__c_logger.exception("EXCEPTION while creating user " + str(username) + ": " + str(e))
-            self.__f_logger.exception("EXCEPTION while creating user " + str(username) + ": " + str(e))
-            raise DataException("EXCEPTION while creating user " + str(username) + ": " + str(e))
-        finally:
-            cur.close()

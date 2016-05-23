@@ -24,6 +24,7 @@ class SdeArchivistProperties:
         self.__ref = ref
         self.tag_config = {}
         self.database_config = {}
+        self.archive_database_config = {}
         self.ldap_config = {}
         self.mail_config = {}
         self.sde_config = {}
@@ -39,6 +40,7 @@ class SdeArchivistProperties:
             self.__config = json.loads(config_stream.read())
             self.tag_config = self.__extract_tag_config(self.__config)
             self.database_config = self.__extract_db_config(self.__config)
+            self.archive_database_config = self.__extract_archive_db_config(self.__config)
             self.ldap_config = self.__extract_ldap_config(self.__config)
             self.mail_config = self.__extract_mail_config(self.__config)
             self.sde_config = self.__extract_sde_config(self.__config)
@@ -68,6 +70,13 @@ class SdeArchivistProperties:
                 return dct["database_config"]
             else:
                 raise ValueError("Missing database config entry (url, port, service, username, password)")
+
+    def __extract_archive_db_config(self, dct):
+        if "archive_database_config" in dct:
+            if self.__validate_archive_db_config(dct["archive_database_config"]):
+                return dct["archive_database_config"]
+            else:
+                raise ValueError("Missing archive database config entry (url, port, service, username, password)")
 
     def __extract_ldap_config(self, dct):
         if "ldap_config" in dct:
@@ -139,6 +148,20 @@ class SdeArchivistProperties:
         if "request_table" not in config:
             valid_config = False
         if "content_table" not in config:
+            valid_config = False
+        return valid_config
+
+    def __validate_archive_db_config(self, config):
+        valid_config = True
+        if "url" not in config:
+            valid_config = False
+        if "port" not in config:
+            valid_config = False
+        if "service" not in config:
+            valid_config = False
+        if "username" not in config:
+            valid_config = False
+        if "password" not in config:
             valid_config = False
         return valid_config
 

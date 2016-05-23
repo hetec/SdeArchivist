@@ -33,3 +33,4 @@ class OracleConnection:
             self.__c_logger.exception("Exception while connection to ORACLE: " + str(e))
             self.__f_logger.exception("Exception while connection to ORACLE: " + str(e))
             raise Exception("Exception while connection to ORACLE: " + str(e))
+
