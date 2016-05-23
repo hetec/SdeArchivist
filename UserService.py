@@ -35,10 +35,14 @@ class UserService:
 
     def create_user(self, username, password):
             """
-            Todo
+            Checks if an USER for the given username exists in the DB. If one exists, no
+            new USER is create else the program adds a USER to DB named like the username part
+            of the data set. After the user was added, he is granted the CONNECT role
+
+            :param username The name of the user
+            :param password The password for the user
 
             """
-            query = ""
 
             try:
                 cur = self.con.cursor()
@@ -53,8 +57,8 @@ class UserService:
                     cur.execute("GRANT CONNECT TO " + str(username.upper()))
                     self.con.commit()
                 else:
-                    self.__c_logger.info("User exists --> DONT CREATE USER")
-                    self.__f_logger.info("User exists --> DONT CREATE USER")
+                    self.__c_logger.info("User exists --> DONT CREATE USER: " + str(username))
+                    self.__f_logger.info("User exists --> DONT CREATE USER: " + str(username))
 
             except cx_Oracle.DatabaseError as e:
                 self.con.rollback()

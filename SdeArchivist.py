@@ -32,6 +32,7 @@ BUFFER_DIR = "buffer"
 CONFIG_DIR = "config"
 CONFIG_FILE_NAME = "archivist_config.json"
 XML_EXTENSION = ".xml"
+DEFAULT_PW = "test"
 
 ASCII = '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -429,6 +430,7 @@ if __name__ == "__main__":
                         renameService.setFileLogger(file_logger)
 
                         # rename the xml file
+                        org_name = xml.split(".")[0]
                         xml = renameService.rename(xml)
 
                         # Index the meta data to elasticserach
@@ -449,7 +451,7 @@ if __name__ == "__main__":
                             file_logger.info(STEP8)
 
                             print "CREATE USER"
-                            user_service.create_user("myuser", "test")
+                            user_service.create_user(org_name, DEFAULT_PW)
 
                         except Exception as e:
                             handle_process_failure(content_table_id, request_table_id, e,
