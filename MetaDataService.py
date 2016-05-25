@@ -68,9 +68,11 @@ class MetaDataService:
         Checks the existence of meta data by a given dataset name
 
         :param name: The dataset name (String)
+
         :return: (Boolean)
-        :exception DataException
+        :exception: DataException
         """
+
         self.__c_logger.info("Check if in DB: " + str(dataset_name))
         self.__f_logger.info("Check if in DB: " + str(dataset_name))
         cur = None

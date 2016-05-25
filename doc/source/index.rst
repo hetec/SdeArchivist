@@ -37,7 +37,7 @@ Welcome to SdeArchivist's documentation!
    UserService
    IndexRepeater
    FailedIndexingCache
-
+   PermissionService
 
 Indices and tables
 ==================
