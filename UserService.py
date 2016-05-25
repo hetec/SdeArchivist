@@ -46,6 +46,7 @@ class UserService:
             of the data set. After the user was added, he is granted the CONNECT role
 
             :param username: The name of the user
+            :exception DataException
             """
 
             cur = None
@@ -54,7 +55,6 @@ class UserService:
                 user_exists = self.__user_exists(str(username), self.archive_con)
                 if not user_exists:
                     pw_hash = self.__fetch_original_password_hash(str(username))
-                    pw_hash = ""
                     if pw_hash:
                         self.__c_logger.info("Create user from hash: " + str(username))
                         self.__f_logger.info("Create user from hash: " + str(username))

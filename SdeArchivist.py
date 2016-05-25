@@ -24,6 +24,7 @@ from DataIndexer import DataIndexer
 from IndexRepeater import IndexRepeater
 from FailedIndexingCache import FailedIndexingCache
 from UserService import UserService
+from PermissionService import PermissionService
 
 # Do not change this in the rest of the code!
 SDE_SOURCE_DB = "sde"
@@ -296,6 +297,9 @@ if __name__ == "__main__":
     indexer.set_console_logger(console_logger)
     indexer.set_file_logger(file_logger)
 
+    # Initialize permission service
+    permission_service = PermissionService(archive_conf, SDE_ARCHIVE_DB)
+
     console_logger.info("REINDEXING")
     file_logger.info("REINDEXING")
 
@@ -453,8 +457,11 @@ if __name__ == "__main__":
                             print "CREATE USER"
                             try:
                                 user_service.create_user(org_name)
+                                permission_service.grant_read_permission(str(org_name), str(xml))
                             except Exception as e:
-                                inform_admin("ERROR: Cannot create user on the archive sde instance because of: " +
+                                inform_admin("ERROR: Cannot create user on the archive sde instance. " +
+                                             "You need to create the user manually and assign him read permissions " +
+                                             " for " + str(xml) + ": " +
                                              str(e), ms)
 
                         except Exception as e:

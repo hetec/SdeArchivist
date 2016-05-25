@@ -69,6 +69,7 @@ class MetaDataService:
 
         :param name: The dataset name (String)
         :return: (Boolean)
+        :exception DataException
         """
         self.__c_logger.info("Check if in DB: " + str(dataset_name))
         self.__f_logger.info("Check if in DB: " + str(dataset_name))
