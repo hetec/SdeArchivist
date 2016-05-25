@@ -4,7 +4,6 @@ import cx_Oracle
 from DataException import DataException
 
 
-
 class MetaDataService:
     """
     Service to process several database operations on the
@@ -43,6 +42,7 @@ class MetaDataService:
         :return: Names (List)
         :exception: DataException
         """
+        cur = None
         try:
             query = "SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_ORDERS_EVW r"
 
@@ -60,7 +60,8 @@ class MetaDataService:
             self.__f_logger.exception("EXCEPTION WHILE finding meta data: " + str(e))
             raise DataException("Error while fetching all datasets: " + str(e))
         finally:
-            cur.close()
+            if cur is not None:
+                cur.close()
 
     def meta_data_exists(self, dataset_name):
         """
@@ -71,6 +72,7 @@ class MetaDataService:
         """
         self.__c_logger.info("Check if in DB: " + str(dataset_name))
         self.__f_logger.info("Check if in DB: " + str(dataset_name))
+        cur = None
         try:
             query = "SELECT i.NAME " \
                     "FROM SDE.GDB_ITEMS_VW i LEFT JOIN SDE.GDB_ITEMTYPES t " \
@@ -92,7 +94,8 @@ class MetaDataService:
             self.__f_logger.exception("EXCEPTION WHILE checking the existence of meta data: " + str(e))
             raise DataException("Error while fetching all datasets: " + str(e))
         finally:
-            cur.close()
+            if cur is not None:
+                cur.close()
 
     def find_meta_data_by_dataset_names(self):
         """
@@ -103,6 +106,7 @@ class MetaDataService:
         """
         self.__c_logger.info("Find all meta data by dataset name")
         self.__f_logger.info("Find all meta data by dataset name")
+        cur = None
         try:
             query = "SELECT i.NAME, t.NAME, i.DOCUMENTATION " \
                     "FROM SDE.GDB_ITEMS_VW i LEFT JOIN SDE.GDB_ITEMTYPES t " \
@@ -127,7 +131,8 @@ class MetaDataService:
             self.__f_logger.exception("EXCEPTION WHILE finding meta data by dataset name: " + str(e))
             raise DataException("Error while fetching all datasets: " + str(e))
         finally:
-            cur.close()
+            if cur is not None:
+                cur.close()
 
     def find_max_id(self):
         """
@@ -139,20 +144,20 @@ class MetaDataService:
         """
         self.__c_logger.info("Find max id in content table")
         self.__f_logger.info("Find max id in content table")
+        cur = None
+        dataset_id = -1
         try:
             getId = "SELECT MAX(c.OBJECTID) FROM ARCHIVE_CONTENT_EVW c"
             cur = self.con.cursor()
             cur.prepare(getId)
             cur.execute(None)
             result = cur.fetchall()
-            if len(result) <= 0:
-                dataset_id = -1
-            else:
+            if len(result) > 0:
                 for r in result:
                     dataset_id = r[0]
                     break
             self.__c_logger.debug("MAX dataset ID in the content table = " + str(dataset_id))
-            if(dataset_id == None):
+            if (dataset_id == None):
                 self.__c_logger.debug("No entries in content table -> Set id to 0: ID = " + str(dataset_id))
                 dataset_id = 0
             return (dataset_id + 1)
@@ -161,23 +166,24 @@ class MetaDataService:
             self.con.rollback()
             self.__c_logger.exception("EXCEPTION WHILE finding max id in content table: " + str(e))
             self.__f_logger.exception("EXCEPTION WHILE finding max id in content table: " + str(e))
-            raise DataException("Exception while fetching max id in "
-                                + "SDE.ARCHIVE_ORDERS_EVW:  \n" + str(e))
+            raise DataException("Exception while fetching max id in " +
+                                "SDE.ARCHIVE_ORDERS_EVW:  \n" + str(e))
         finally:
-            cur.close()
+            if cur is not None:
+                cur.close()
 
     def find_id_by_name(self, dataset_name):
         self.__c_logger.info("Find id by name")
         self.__f_logger.info("Find id by name")
+        cur = None
+        dataset_id = -1
         try:
             getId = "SELECT r.OBJECTID FROM SDE.ARCHIVE_ORDERS_EVW r WHERE r.NAME_OF_DATASET = :data_name"
             cur = self.con.cursor()
             cur.prepare(getId)
             cur.execute(None, {"data_name": dataset_name})
             result = cur.fetchall()
-            if len(result) <= 0:
-                dataset_id = -1
-            else:
+            if len(result) > 0:
                 for r in result:
                     dataset_id = r[0]
                     break
@@ -192,7 +198,8 @@ class MetaDataService:
                                 + dataset_name
                                 + " from SDE.ARCHIVE_ORDERS_EVW:  \n" + str(e))
         finally:
-            cur.close()
+            if cur is not None:
+                cur.close()
 
     def add_process(self, dataset_name, remarks, org_name):
         """
@@ -206,6 +213,7 @@ class MetaDataService:
         """
         self.__c_logger.info("Add process information to the content table")
         self.__f_logger.info("Add process information to the content table")
+        cur = None
         did = self.find_max_id()
 
         try:
@@ -226,7 +234,8 @@ class MetaDataService:
             self.__f_logger.exception("EXCEPTION WHILE adding process information to the content table: " + str(e))
             raise DataException("Exception while adding a process to SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
         finally:
-            cur.close()
+            if cur is not None:
+                cur.close()
 
     def update_state(self, data_id, state):
         """
@@ -236,8 +245,10 @@ class MetaDataService:
         :param state: The new value of the state column (String)
         :exception: DataException
         """
+
         self.__c_logger.info("Update process information to the content table")
         self.__f_logger.info("Update process information to the content table")
+        cur = None
         try:
             query = "UPDATE SDE.ARCHIVE_CONTENT_EVW c SET c.REMARKS = :state WHERE c.OBJECTID = :data_id"
             cur = self.con.cursor()
@@ -250,7 +261,8 @@ class MetaDataService:
             self.__f_logger.exception("EXCEPTION WHILE updating process information to the content table: " + str(e))
             raise DataException("Exception while updating the state column of SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
         finally:
-            cur.close()
+            if cur is not None:
+                cur.close()
 
     def update_name(self, data_id, name):
         """
@@ -260,8 +272,10 @@ class MetaDataService:
         :param name: The new value of the state column (String)
         :exception: DataException
         """
+
         self.__c_logger.info("Update process information (name) to the content table")
         self.__f_logger.info("Update process information (name) to the content table")
+        cur = None
         try:
             query = "UPDATE SDE.ARCHIVE_CONTENT_EVW c SET c.NAME_OF_DATASET = :name WHERE c.OBJECTID = :data_id"
             cur = self.con.cursor()
@@ -276,7 +290,8 @@ class MetaDataService:
                                       + str(e))
             raise DataException("Exception while updating the name column of SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
         finally:
-            cur.close()
+            if cur is not None:
+                cur.close()
 
     def delete_by_id(self, data_id):
         """
@@ -286,6 +301,8 @@ class MetaDataService:
         """
         self.__c_logger.info("Delete request from the request table")
         self.__f_logger.info("Delete request from the request table")
+
+        cur = None
         try:
             query = "DELETE FROM SDE.ARCHIVE_ORDERS_EVW WHERE OBJECTID = :data_id"
             cur = self.con.cursor()
@@ -301,28 +318,5 @@ class MetaDataService:
                                 + str(data_id)
                                 + " column of SDE.ARCHIVE_ORDERS_EVW: \n" + e)
         finally:
-            cur.close()
-
-    def find_flagged_meta_data(self):
-        """
-        Finds all meta data in the defined oracle database which are marked by a flag
-
-        :return: Meta data as dictionary {name : meta data xml string}
-        """
-        query = "SELECT i.NAME, t.NAME, i.DOCUMENTATION FROM SDE.GDB_ITEMS_VW i LEFT JOIN SDE.GDB_ITEMTYPES t " \
-                "ON i.Type = t.UUID " \
-                "WHERE DBMS_LOB.instr(i.DOCUMENTATION, :flag) > 0 " \
-                "AND t.NAME = :name " \
-                "AND length(i.DOCUMENTATION) > 1 " \
-                "AND i.DOCUMENTATION IS NOT NULL"
-
-        cur = self.con.cursor()
-        cur.prepare(query)
-        cur.execute(None, {'name': 'Feature Dataset', 'flag': 'DRP=true'})
-        cur.arraysize = 100
-        result = cur.fetchall()
-        metas = {}
-        for r in result:
-            metas[r[0]] = r[2].read()
-        cur.close()
-        return metas
+            if cur is not None:
+                cur.close()

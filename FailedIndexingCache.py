@@ -27,6 +27,7 @@ class FailedIndexingCache:
     def write_all_to_cache(self, contents):
         """
         Writes several lines to the cache
+
         :param contents: List of lines (List)
         """
         for line in contents:

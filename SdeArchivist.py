@@ -284,7 +284,7 @@ if __name__ == "__main__":
     meta_data_service.set_file_logger(file_logger)
 
     # Create user service
-    user_service = UserService(archive_connection)
+    user_service = UserService(connection, archive_connection)
     user_service.set_console_logger(console_logger)
     user_service.set_file_logger(file_logger)
 
@@ -451,7 +451,7 @@ if __name__ == "__main__":
                             file_logger.info(STEP8)
 
                             print "CREATE USER"
-                            user_service.create_user(org_name, DEFAULT_PW)
+                            user_service.create_user(org_name)
 
                         except Exception as e:
                             handle_process_failure(content_table_id, request_table_id, e,
