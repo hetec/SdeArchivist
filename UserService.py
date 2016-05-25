@@ -79,7 +79,6 @@ class UserService:
                     self.__f_logger.info("Don't create user: " + str(username))
 
             except Exception as e:
-                self.archive_con.rollback()
                 self.__c_logger.exception("EXCEPTION while creating user " + str(username) + ": " + str(e))
                 self.__f_logger.exception("EXCEPTION while creating user " + str(username) + ": " + str(e))
                 raise DataException("EXCEPTION while creating user " + str(username) + ": " + str(e))
@@ -109,10 +108,9 @@ class UserService:
                     return ""
 
             except Exception as e:
-                self.db_con.rollback()
                 self.__c_logger.exception("EXCEPTION while fetching pw hash for user " + str(username) + ": " + str(e))
                 self.__f_logger.exception("EXCEPTION while fetching pw hash for user " + str(username) + ": " + str(e))
-                return DataException("EXCEPTION while fetching pw hash for user " + str(username) + ": " + str(e))
+                return ""
             finally:
                 if cur is not None:
                     cur.close()
@@ -132,11 +130,9 @@ class UserService:
                 else:
                     self.__c_logger.info("User not found: Cannot grant connect to user")
                     self.__f_logger.info("User not found: Cannot grant connect to user")
-                    # return an empty string if the hash doesn't exist
-                    return ""
+                    raise DataException("No user found to grant CONNECT role:  " + str(username))
 
             except Exception as e:
-                self.archive_con.rollback()
                 self.__c_logger.exception("EXCEPTION while granting connect to user " + str(username) + ": " + str(e))
                 self.__f_logger.exception("EXCEPTION while granting connect to user " + str(username) + ": " + str(e))
                 raise DataException("EXCEPTION while granting connect to user " + str(username) + ": " + str(e))
@@ -160,7 +156,6 @@ class UserService:
                     return True
 
             except Exception as e:
-                connection.rollback()
                 self.__c_logger.exception("EXCEPTION while checking existence of user " + str(username) + ": " + str(e))
                 self.__f_logger.exception("EXCEPTION while checking existence of user " + str(username) + ": " + str(e))
                 raise DataException("EXCEPTION while checking existence of user " + str(username) + ": " + str(e))
