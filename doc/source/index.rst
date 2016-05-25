@@ -34,6 +34,9 @@ Welcome to SdeArchivist's documentation!
    XmlWorkspaceImporter
    SearchableMetaData
    DataIndexer
+   UserService
+   IndexRepeater
+   FailedIndexingCache
 
 
 Indices and tables

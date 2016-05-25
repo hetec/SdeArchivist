@@ -18,7 +18,7 @@ class FailedIndexingCache:
 
     def write_to_cache(self, content):
         """
-        Writes on line to the cache
+        Writes one line to the cache
 
         :param content: The content (String)
         """

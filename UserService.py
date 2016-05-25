@@ -39,9 +39,8 @@ class UserService:
             new USER is create else the program adds a USER to DB named like the username part
             of the data set. After the user was added, he is granted the CONNECT role
 
-            :param username The name of the user
-            :param password The password for the user
-
+            :param username: The name of the user
+            :param password: The password for the user
             """
 
             try:
