@@ -284,7 +284,7 @@ if __name__ == "__main__":
     meta_data_service.set_file_logger(file_logger)
 
     # Create user service
-    user_service = UserService(connection, archive_connection)
+    user_service = UserService(connection, archive_connection, ms)
     user_service.set_console_logger(console_logger)
     user_service.set_file_logger(file_logger)
 
@@ -451,7 +451,11 @@ if __name__ == "__main__":
                             file_logger.info(STEP8)
 
                             print "CREATE USER"
-                            user_service.create_user(org_name)
+                            try:
+                                user_service.create_user(org_name)
+                            except Exception as e:
+                                inform_admin("ERROR: Cannot create user on the archive sde instance because of: " +
+                                             str(e), ms)
 
                         except Exception as e:
                             handle_process_failure(content_table_id, request_table_id, e,

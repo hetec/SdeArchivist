@@ -10,16 +10,18 @@ class UserService:
     Service to create user accounts
     """
 
-    def __init__(self, db_connection, archive_connection):
+    def __init__(self, db_connection, archive_connection, mail_provider):
         """
         Creates a new UserService instance
 
         :param db_connection: A connection object to connect to the original arcSde db (cx_Oracle connection object)
         :param archive_connection: A connection object to connect to the archive arcSde db (cx_Oracle connection object)
+        :param mail_provider: A MailSender instance to send error messages
         :return: New UserService
         """
         self.archive_con = archive_connection
         self.db_con = db_connection
+        self.mail = mail_provider
 
     def set_console_logger(self, console_logger):
         """
@@ -60,20 +62,23 @@ class UserService:
                                     str(pw_hash) + "' DEFAULT TABLESPACE USERS")
                         self.__grant_connect_to_user(str(username))
                     else:
-                        # todo Send mail to admin
                         self.__c_logger.info("No hash, create user with default pw (username): " + str(username))
                         self.__f_logger.info("No hash, create user with default pw (username): " + str(username))
                         # Create a 8 digests long random string
                         random_key = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+                        random_key = 'PW' + random_key
                         cur.execute("CREATE USER " + str(username) + " IDENTIFIED BY " + random_key +
                                     " DEFAULT TABLESPACE USERS")
                         self.__grant_connect_to_user(str(username))
+                        #  Send mail to admin
+                        self.mail.send_to_admin("USER: " + str(username) + " was created with a random password! " +
+                                                "Please CHANGE the password and inform the concerned user")
                     self.archive_con.commit()
                 else:
                     self.__c_logger.info("Don't create user: " + str(username))
                     self.__f_logger.info("Don't create user: " + str(username))
 
-            except cx_Oracle.DatabaseError as e:
+            except Exception as e:
                 self.archive_con.rollback()
                 self.__c_logger.exception("EXCEPTION while creating user " + str(username) + ": " + str(e))
                 self.__f_logger.exception("EXCEPTION while creating user " + str(username) + ": " + str(e))
