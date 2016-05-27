@@ -459,7 +459,8 @@ if __name__ == "__main__":
                                 user_service.create_user(org_name)
                                 permission_service.grant_read_permission(str(org_name), str(xml))
                             except Exception as e:
-                                inform_admin("ERROR: Cannot create user on the archive sde instance. " +
+                                inform_admin("ERROR: Cannot create user or grant permissions " +
+                                             "on the archive sde instance. " +
                                              "You need to create the user manually and assign him read permissions " +
                                              " for " + str(xml) + ": " +
                                              str(e), ms)

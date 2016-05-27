@@ -8,6 +8,13 @@
     "request_table" : "",
     "content_table" : ""
   },
+  "archive_database_config" : {
+    "url" : "",
+    "port" :  "",
+    "service" :  "",
+    "username" : "",
+    "password" : ""
+  },
   "sde_config" : {
     "project_root" : "",
     "database_type" : "",

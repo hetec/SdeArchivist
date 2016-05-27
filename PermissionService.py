@@ -23,7 +23,7 @@ class PermissionService:
 
         :param user: The user who gets the permission
         :param data_set_name: The data set for which the permission is granted
-        :exception Exception
+        :exception: Exception
         """
         try:
             data_set = self.__sde_file + "/" + str(data_set_name)
