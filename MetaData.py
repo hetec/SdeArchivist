@@ -27,6 +27,7 @@ class MetaData:
         :param name: The name of the meta date (String)
         :param value: The value of the meta date (String)
         """
+        name = self.__replace_existing_key_names(name)
         self.__meta_data[name] = value
 
     def meta_data_info(self):
@@ -62,9 +63,10 @@ class MetaData:
         """
         return self.__is_valid
 
-if __name__ == "__main__":
-    meta = MetaData()
-    meta.add_meta_data("eins","1")
-    meta.add_meta_data("zwei","2")
-    test = meta.get_json()
-    print test
+    def __replace_existing_key_names(self, name):
+        temp_name = name
+        counter = 1
+        while str(temp_name) in self.meta_data():
+            temp_name = name + "_" + str(counter)
+            counter += 1
+        return temp_name
