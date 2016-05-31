@@ -324,38 +324,55 @@ class MetaDataService:
             if cur is not None:
                 cur.close()
 
-    # def add_meta_data(self, meta_data):
-    #     """
-    #     Add a new process entry to the content table
-    #
-    #     :param dataset_name: Name of the archived dataset (String)
-    #     :param remarks: Notes about the current process state or failure (String)
-    #     :param org_name: The original dataset name (String)
-    #     :return: ID of the entry (Integer)
-    #     :exception: DataException
-    #     """
-    #     self.__c_logger.info("Add process information to the content table")
-    #     self.__f_logger.info("Add process information to the content table")
-    #     cur = None
-    #     did = self.find_max_id()
-    #
-    #     try:
-    #         query = "INSERT INTO " \
-    #                 "SDE.ARCHIVE_CONTENT_EVW " \
-    #                 "(OBJECTID, NAME_OF_DATASET, DATE_OF_ARCHIVING, REMARKS, NAME_OF_DATASET_ORIGINAL) " \
-    #                 "VALUES (:data_id, :data_name, :req_date, :remarks, :org)"
-    #         cur = self.con.cursor()
-    #         cur_date = datetime.date.today()
-    #         cur.prepare(query)
-    #         cur.execute(None, {'data_id': did, 'data_name': dataset_name, 'req_date': cur_date, 'remarks': remarks,
-    #                            'org': org_name})
-    #         self.con.commit()
-    #         return did
-    #     except cx_Oracle.DatabaseError as e:
-    #         self.con.rollback()
-    #         self.__c_logger.exception("EXCEPTION WHILE adding process information to the content table: " + str(e))
-    #         self.__f_logger.exception("EXCEPTION WHILE adding process information to the content table: " + str(e))
-    #         raise DataException("Exception while adding a process to SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
-    #     finally:
-    #         if cur is not None:
-    #             cur.close()
+    def add_meta_data(self, meta_data):
+        """
+        Add a new process entry to the content table
+
+        :param dataset_name: Name of the archived dataset (String)
+        :param remarks: Notes about the current process state or failure (String)
+        :param org_name: The original dataset name (String)
+        :return: ID of the entry (Integer)
+        :exception: DataException
+        """
+        self.__c_logger.info("Add process information to the content table")
+        self.__f_logger.info("Add process information to the content table")
+        cur = None
+        did = self.find_max_id()
+
+        try:
+            query = "INSERT INTO sde_meta_data (title, topic, description, " \
+                "contact_name, contact_organisation, contact_position, contact_role, creation_date, content_lang, " \
+                "bounding_box_west, bounding_box_east, bounding_box_north, bounding_box_south) " \
+                "VALUES (:title, :topic, :desc, :name, :org, :pos, :role, :date, :lang, :west, :east, :north, :south);"
+            cur = self.con.cursor()
+            cur_date = datetime.date.today()
+            cur.prepare(query)
+            cur.execute(None, {
+                'title': self.__check_meta_data_value(meta_data, 'Metadata/Contact/Name'),
+                'org': self.__check_meta_data_value(meta_data, 'Metadata/Contact/Organisation'),
+                'title': self.__check_meta_data_value(meta_data, 'Metadata/Contact/Name'),
+                'title': self.__check_meta_data_value(meta_data, 'Metadata/Contact/Name'),
+                'title': self.__check_meta_data_value(meta_data, 'Metadata/Contact/Name'),
+                'title': self.__check_meta_data_value(meta_data, 'Metadata/Contact/Name'),
+            })
+            self.con.commit()
+            return did
+        except cx_Oracle.DatabaseError as e:
+            self.con.rollback()
+            self.__c_logger.exception("EXCEPTION WHILE adding process information to the content table: " + str(e))
+            self.__f_logger.exception("EXCEPTION WHILE adding process information to the content table: " + str(e))
+            raise DataException("Exception while adding a process to SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
+        finally:
+            if cur is not None:
+                cur.close()
+
+
+    def __check_meta_data_value(self, meta_data, value):
+        value = None
+        try:
+            value = meta_data.meta_data[value]
+        except Exception as e:
+            self.__c_logger.exception("EXCEPTION WHILE setting a meta data value: " + str(value) + ": " + str(e))
+            self.__f_logger.exception("EXCEPTION WHILE setting a meta data value: " + str(value) + ": " + str(e))
+
+        return value

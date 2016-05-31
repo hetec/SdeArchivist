@@ -1,6 +1,7 @@
 # -*- encoding utf-8 -*-
 import copy
 import json
+import types
 
 class MetaData:
     """
@@ -27,8 +28,8 @@ class MetaData:
         :param name: The name of the meta date (String)
         :param value: The value of the meta date (String)
         """
-        name = self.__replace_existing_key_names(name)
-        self.__meta_data[name] = value
+        #name = self.__replace_existing_key_names(name)
+        self.__meta_data[name] = self.__handle_duplicates(name, value)
 
     def meta_data_info(self):
         """
@@ -70,3 +71,16 @@ class MetaData:
             temp_name = name + "_" + str(counter)
             counter += 1
         return temp_name
+
+    def __handle_duplicates(self, name, value):
+        element_list = None
+        if name in self.__meta_data and type(self.__meta_data[name]) == types.ListType:
+            element_list = self.__meta_data[name]
+            element_list.append(str(value))
+            return element_list
+        elif str(name) in self.meta_data():
+            current_value = self.__meta_data[name]
+            element_list = [str(current_value), str(value)]
+            return element_list
+        else:
+            return str(value)

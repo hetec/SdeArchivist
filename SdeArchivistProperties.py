@@ -55,6 +55,7 @@ class SdeArchivistProperties:
         for entry in dct["tag_config"]["tags"]:
             if self.__validate_reqired_tag_config(entry):
                 new_dict[str(entry["tag_name"])] = MetaDataTag.MetaDataTag(
+                    entry["key"],
                     entry["tag_name"],
                     entry["is_empty"] if "is_empty" in entry else False,
                     entry["optional"] if "optional" in entry else False,
@@ -130,6 +131,8 @@ class SdeArchivistProperties:
     def __validate_reqired_tag_config(self, config):
         valid_config = True
         if "tag_name" not in config:
+            valid_config = False
+        if "key" not in config:
             valid_config = False
         return valid_config
 

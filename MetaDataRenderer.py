@@ -24,5 +24,5 @@ class MetaDataRenderer:
         meta_data_dict = self.__meta_data.meta_data_info()
         rendered_meta = ""
         for key in meta_data_dict:
-            rendered_meta += "{:>30} | {}\n".format(key, meta_data_dict[key])
+            rendered_meta += "{:>50} | {}\n".format(key, meta_data_dict[key])
         return rendered_meta

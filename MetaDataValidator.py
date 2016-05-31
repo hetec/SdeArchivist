@@ -44,7 +44,7 @@ class MetaDataValidator:
     def __getContent(self, tag_config, tag_instance, meta_data):
         if tag_instance.text:
             print("HAS CONTENT")
-            meta_data.add_meta_data(self.__getRightTagName(tag_config), str(tag_instance.text))
+            meta_data.add_meta_data(tag_config.tag_key(), str(tag_instance.text))
         else:
             print("IS EMPTY")
             attributes = tag_instance.attrib
@@ -52,7 +52,7 @@ class MetaDataValidator:
                 print "ATTRIBUTE: " + str(attr)
                 value = attributes[str(attr)]
                 print "VALUE: " + str(value)
-                meta_data.add_meta_data(self.__getRightTagName(tag_config) + "_" + str(attr), str(value))
+                meta_data.add_meta_data(tag_config.tag_key() + "_" + str(attr), str(value))
 
     def __validate_attribute(self, attribute_names, tag_name):
         attributes = tag_name.attrib
@@ -160,10 +160,8 @@ class MetaDataValidator:
 
     def __getRightTagName(self, tag):
         if not tag.mapped_name():
-            print "No mapped name: " + tag.tag_name()
             return tag.tag_name()
         else:
-            print "Mapped name: " + str(tag.mapped_name())
             return tag.mapped_name()
 
 
