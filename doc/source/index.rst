@@ -12,6 +12,8 @@ Welcome to SdeArchivist's documentation!
    :numbered:
 
    general
+   Workflow
+   MetaDataStores
    SdeArchivist
    MetaDataService
    datasetRenameService

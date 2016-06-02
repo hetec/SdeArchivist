@@ -337,6 +337,7 @@ class MetaDataService:
         Add required and optional meta data to the database
 
         :param meta_data: Meta data object containing validated meta data (MetaData)
+        :param arch_title: The title of the data set after it was copied to the archvie
         :exception: DataException
         """
         self.__c_logger.info("Insert meta data into db")

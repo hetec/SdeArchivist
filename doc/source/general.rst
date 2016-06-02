@@ -21,7 +21,8 @@ The archivist_config.json file
         "port" :  "Port of the database",
         "service" :  "Name of the service running on the database",
         "username" : "John Doe",
-        "password" : "*************"
+        "password" : "*************",
+        "meta_data_table" : "Table to hold the meta data"
     },
     "sde_config" : {
         "project_root" : "Local path to the SdeArchivist directory",
@@ -66,27 +67,31 @@ The archivist_config.json file
         "log_file_size" : 4000 in bytes,
         "log_file_count" : 3 number of files which are retained
     },
-    "tag_config" : {
-        "tags" : [
+      "tag_config" : {
+    "tags" : [
           {
+            "key": "title",
             "tag_name" : "DataProperties/itemProps/itemName",
             "mapped_name" : "Overview/ItemDescription/title",
             "is_empty" : false,
             "optional" : false
           },
           {
+            "key": "content_type",
             "tag_name" : "DataProperties/itemProps/imsContentType",
             "mapped_name" : "Overview/topicsAndKeywords/ContentType",
             "is_empty" : false,
             "optional" : false
           },
           {
+            "key": "description",
             "tag_name" : "dataIdInfo/idAbs",
             "mapped_name" : "Overview/ItemDescription/abstract",
             "is_empty" : false,
             "optional" : false
           },
           {
+            "key": "topic",
             "tag_name" : "dataIdInfo/tpCat/TopicCatCd",
             "mapped_name" : "Overview/topicsAndKeywords",
             "is_empty" : true,
@@ -94,6 +99,7 @@ The archivist_config.json file
             "optional" : false
           },
           {
+            "key": "content_lang",
             "tag_name" : "dataIdInfo/dataLang/languageCode",
             "mapped_name" : "Resource/Details/Language",
             "is_empty" : true,
@@ -101,24 +107,28 @@ The archivist_config.json file
             "optional" : false
           },
           {
+            "key": "contact_name",
             "tag_name" : "mdContact/rpIndName",
             "mapped_name" : "Metadata/Contact/Name",
             "is_empty" : false,
             "optional" : false
           },
           {
+            "key": "contact_position",
             "tag_name" : "mdContact/rpPosName",
             "mapped_name" : "Metadata/Contact/Position",
             "is_empty" : false,
             "optional" : false
           },
           {
+            "key": "contact_organisation",
             "tag_name" : "mdContact/rpOrgName",
             "mapped_name" : "Metadata/Contact/Organisation",
             "is_empty" : false,
             "optional" : false
           },
           {
+            "key": "contact_role",
             "tag_name" : "mdContact/role/RoleCd",
             "mapped_name" : "Metadata/Contact/Role",
             "is_empty" : true,
@@ -126,34 +136,84 @@ The archivist_config.json file
             "optional" : false
           },
           {
+            "key": "creation_date",
             "tag_name" : "mdDateSt",
             "mapped_name" : "Metadata/Timestamp",
             "is_empty" : false,
             "optional" : false
           },
           {
+            "key": "bounding_box_west",
             "tag_name" : "dataIdInfo/dataExt/geoEle/GeoBndBox/westBL",
-            "mapped_name" : "Overview/ItemDescription/BoundingBox",
+            "mapped_name" : "Overview/ItemDescription/BoundingBox/west",
             "is_empty" : false,
             "optional" : false
           },
           {
+            "key": "bounding_box_east",
             "tag_name" : "dataIdInfo/dataExt/geoEle/GeoBndBox/eastBL",
-            "mapped_name" : "Overview/ItemDescription/BoundingBox",
+            "mapped_name" : "Overview/ItemDescription/BoundingBox/east",
             "is_empty" : false,
             "optional" : false
           },
           {
+            "key": "bounding_box_north",
             "tag_name" : "dataIdInfo/dataExt/geoEle/GeoBndBox/northBL",
-            "mapped_name" : "Overview/ItemDescription/BoundingBox",
+            "mapped_name" : "Overview/ItemDescription/BoundingBox/north",
             "is_empty" : false,
             "optional" : false
           },
           {
+            "key": "bounding_box_south",
             "tag_name" : "dataIdInfo/dataExt/geoEle/GeoBndBox/southBL",
-            "mapped_name" : "Overview/ItemDescription/BoundingBox",
+            "mapped_name" : "Overview/ItemDescription/BoundingBox/south",
             "is_empty" : false,
             "optional" : false
+          },
+          {
+            "key": "spatial_representation_type",
+            "tag_name" : "dataIdInfo/spatRpType/SpatRepTypCd",
+            "mapped_name" : "Resource/Details/SpatialRepresentationType",
+            "is_empty" : true,
+            "attributes": ["value"],
+            "optional" : true
+          },
+          {
+            "key": "maintenance_frequency",
+            "tag_name" : "dataIdInfo/resMaint/maintFreq/MaintFreqCd",
+            "mapped_name" : "Resource/Maintenance/UpdateFrequency",
+            "is_empty" : true,
+            "attributes": ["value"],
+            "optional" : true
+          },
+          {
+            "key": "maintenance_note",
+            "tag_name" : "dataIdInfo/resMaint/maintNote",
+            "mapped_name" : "Resource/Maintenance/MaintenanceNote",
+            "is_empty" : false,
+            "optional" : true
+          },
+          {
+            "key": "spatial_reference_code",
+            "tag_name" : "refSysInfo/RefSystem/refSysID/identCode",
+            "mapped_name" : "Resource/SpecialReference/Code",
+            "is_empty" : true,
+            "attributes": ["code"],
+            "optional" : true
+          },
+          {
+            "key": "spatial_reference_space",
+            "tag_name" : "refSysInfo/RefSystem/refSysID/idCodeSpace",
+            "mapped_name" : "Resource/SpecialReference/Space",
+            "is_empty" : false,
+            "optional" : true
+          },
+          {
+            "key": "spatial_reference_version",
+            "tag_name" : "refSysInfo/RefSystem/refSysID/idVersion",
+            "mapped_name" : "Resource/SpecialReference/Version",
+            "is_empty" : false,
+            "optional" : true
           }
         ]
       }
@@ -215,7 +275,7 @@ Empty tags::
             "tag_name" : "parentTag/childTag/tag",
             "is_empty" : true,
             "attributes" : ["attriubteName", ... ]
-            "mapped_name" : "desiredName in emails",
+            "mapped_name" : "desiredName in emails"
           }
         ]
       }
@@ -237,18 +297,64 @@ This means for the validation:
     It is recommended to use qualified paths to identify tags
     else undesired behavior is possible because of equally named tags in the XML (See tag resolution)
 
+Optional tags::
+
+    <tag attributeName="attributeValue"/>
+
+    "tag_config" : {
+        "required" : [
+          {
+            "tag_name" : "parentTag/childTag/tag",
+            "is_empty" : true,
+            "attributes" : ["attriubteName", ... ]
+            "mapped_name" : "desiredName in emails",
+            "optional" : true
+          }
+        ]
+      }
+
+It is possible to mark a tag as 'optional'. This means the tag content will be extracted to the meta data store
+(ES, Database) if the tag contains data. If not the entry for the tag in the meta data store remains empty but doesn't
+force an error or a failure of the validation process
+
+
 Data Types
 ----------
 
 Achievable data types: 'Feature Dataset', 'Raster Dataset', 'Table', 'Raster Catalog', 'Mosaic Dataset'
+
+Naming schema
+-------------
+
+The data sets will be renamed during the coping process:
+
+USERNAME.dataname --> SDE.dataname_USERNAME
+
+If the name of the data set already exists, a counter will be appended:
+
+USERNAME.dataname --> SDE.dataname_USERNAME_1
+
+USERNAME.dataname --> SDE.dataname_USERNAME_2
+
+...
+
+USERNAME.dataname --> SDE.dataname_USERNAME_999
+
+USERNAME.dataname --> SDE.dataname_USERNAME_1000
 
 
 Exit Codes
 ----------
 
 **0** - Program finished successfully
+
 **1** - Problem with the original sde database. The program is not able to establish a connection
+
 **2** - Problem with the archive sde database. The program is not able to establish a connection
+
+**3** - Problem with the original sde instance. The program is not able to establish a connection (create a sde connection file)
+
+**4** - Problem with the archive sde instance. The program is not able to establish a connection (create a sde connection file)
 
 Known Problems
 --------------
