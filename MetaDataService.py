@@ -10,16 +10,20 @@ class MetaDataService:
     meta data, request table and content table
     """
 
-    def __init__(self, connection, archive_connection):
+    def __init__(self, connection, archive_connection, db_config, arch_config):
         """
         Creates a new MetaDataService instance
 
         :param connection: A connection object (cx_Oracle connection object)
         :param archive_connection: A connection object for the archive db (cx_Oracle connection object)
+        :param db_config: Database configuration values
+        :param arch_config: Archive database configuration values
         :return: New MetaDataService
         """
         self.con = connection
         self.a_con = archive_connection
+        self.db_config = db_config
+        self.arch_config = arch_config
 
     def set_console_logger(self, console_logger):
         """
@@ -46,7 +50,7 @@ class MetaDataService:
         """
         cur = None
         try:
-            query = "SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_ORDERS_EVW r"
+            query = "SELECT r.NAME_OF_DATASET FROM SDE." + self.db_config["request_table"] + " r"
 
             cur = self.con.cursor()
             cur.prepare(query)
@@ -60,7 +64,7 @@ class MetaDataService:
         except cx_Oracle.DatabaseError as e:
             self.__c_logger.exception("EXCEPTION WHILE finding meta data: " + str(e))
             self.__f_logger.exception("EXCEPTION WHILE finding meta data: " + str(e))
-            raise DataException("Error while fetching all datasets: " + str(e))
+            raise DataException("Error while fetching all data sets: " + str(e))
         finally:
             if cur is not None:
                 cur.close()
@@ -128,7 +132,7 @@ class MetaDataService:
             result = cur.fetchall()
             metas = {}
             for r in result:
-                self.__c_logger.exception("DATASET FOUND ==> " + str(r))
+                self.__c_logger.info("DATASET FOUND ==> " + str(r))
                 metas[r[0]] = r[2].read()
             return metas
         except cx_Oracle.DatabaseError as e:
@@ -152,7 +156,7 @@ class MetaDataService:
         cur = None
         dataset_id = -1
         try:
-            getId = "SELECT MAX(c.OBJECTID) FROM ARCHIVE_CONTENT_EVW c"
+            getId = "SELECT MAX(c.OBJECTID) FROM SDE." + self.db_config["content_table"] + " c"
             cur = self.con.cursor()
             cur.prepare(getId)
             cur.execute(None)
@@ -183,7 +187,7 @@ class MetaDataService:
         cur = None
         dataset_id = -1
         try:
-            getId = "SELECT r.OBJECTID FROM SDE.ARCHIVE_ORDERS_EVW r WHERE r.NAME_OF_DATASET = :data_name"
+            getId = "SELECT r.OBJECTID FROM SDE." + self.db_config["request_table"] + " r WHERE r.NAME_OF_DATASET = :data_name"
             cur = self.con.cursor()
             cur.prepare(getId)
             cur.execute(None, {"data_name": dataset_name})
@@ -223,8 +227,8 @@ class MetaDataService:
 
         try:
             query = "INSERT INTO " \
-                    "SDE.ARCHIVE_CONTENT_EVW " \
-                    "(OBJECTID, NAME_OF_DATASET, DATE_OF_ARCHIVING, REMARKS, NAME_OF_DATASET_ORIGINAL) " \
+                    "SDE." + self.db_config["content_table"] + \
+                    " (OBJECTID, NAME_OF_DATASET, DATE_OF_ARCHIVING, REMARKS, NAME_OF_DATASET_ORIGINAL) " \
                     "VALUES (:data_id, :data_name, :req_date, :remarks, :org)"
             cur = self.con.cursor()
             cur_date = datetime.date.today()
@@ -246,7 +250,7 @@ class MetaDataService:
         """
         Set the state of a row in the content table. The row is found by dataset ID
 
-        :param data_id: Id of the related dataset (Integer)
+        :param data_id: Id of the related data set (Integer)
         :param state: The new value of the state column (String)
         :exception: DataException
         """
@@ -255,7 +259,8 @@ class MetaDataService:
         self.__f_logger.info("Update process information to the content table")
         cur = None
         try:
-            query = "UPDATE SDE.ARCHIVE_CONTENT_EVW c SET c.REMARKS = :state WHERE c.OBJECTID = :data_id"
+            query = "UPDATE SDE." + self.db_config["content_table"] +\
+                    " c SET c.REMARKS = :state WHERE c.OBJECTID = :data_id"
             cur = self.con.cursor()
             cur.prepare(query)
             cur.execute(None, {'state': state, 'data_id': data_id})
@@ -282,7 +287,8 @@ class MetaDataService:
         self.__f_logger.info("Update process information (name) to the content table")
         cur = None
         try:
-            query = "UPDATE SDE.ARCHIVE_CONTENT_EVW c SET c.NAME_OF_DATASET = :name WHERE c.OBJECTID = :data_id"
+            query = "UPDATE SDE." + self.db_config["content_table"] +\
+                    " c SET c.NAME_OF_DATASET = :name WHERE c.OBJECTID = :data_id"
             cur = self.con.cursor()
             cur.prepare(query)
             cur.execute(None, {'name': name, 'data_id': data_id})
@@ -309,7 +315,7 @@ class MetaDataService:
 
         cur = None
         try:
-            query = "DELETE FROM SDE.ARCHIVE_ORDERS_EVW WHERE OBJECTID = :data_id"
+            query = "DELETE FROM SDE." + self.db_config["request_table"] + " WHERE OBJECTID = :data_id"
             cur = self.con.cursor()
             cur.prepare(query)
             cur.execute(None, {'data_id': data_id})
@@ -319,21 +325,18 @@ class MetaDataService:
             self.con.rollback()
             self.__c_logger.exception("EXCEPTION WHILE deleting request from the request table: " + str(e))
             self.__f_logger.exception("EXCEPTION WHILE deleting request from the request table: " + str(e))
-            raise DataException("Exception while deleteing the id "
-                                + str(data_id)
-                                + " column of SDE.ARCHIVE_ORDERS_EVW: \n" + e)
+            raise DataException("Exception while deleting the id " +
+                                str(data_id) +
+                                " column of SDE.ARCHIVE_ORDERS_EVW: \n" + str(e))
         finally:
             if cur is not None:
                 cur.close()
 
     def add_meta_data(self, meta_data):
         """
-        Add a new process entry to the content table
+        Add required and optional meta data to the database
 
-        :param dataset_name: Name of the archived dataset (String)
-        :param remarks: Notes about the current process state or failure (String)
-        :param org_name: The original dataset name (String)
-        :return: ID of the entry (Integer)
+        :param meta_data: Meta data object containing validated meta data (MetaData)
         :exception: DataException
         """
         self.__c_logger.info("Insert meta data into db")
@@ -342,10 +345,11 @@ class MetaDataService:
 
         try:
             query = "INSERT INTO " \
-                "SDE.SDE_META_DATA (title, topic, description, " \
+                "SDE." + self.arch_config['meta_data_table'] + " (title, topic, description, " \
                 "contact_name, contact_organisation, contact_position, contact_role, creation_date, content_lang, " \
                 "bounding_box_west, bounding_box_east, bounding_box_north, bounding_box_south) " \
-                "VALUES (:title, :topic, :description, :contact_name, :org, :pos, :role, :create_date, :lang, :west, :east, :north, :south)"
+                "VALUES (:title, :topic, :description, :contact_name, :org, " \
+                ":pos, :role, :create_date, :lang, :west, :east, :north, :south)"
             cur = self.a_con.cursor()
             cur.prepare(query)
             cur.execute(None, {

@@ -280,7 +280,11 @@ if __name__ == "__main__":
     required_tags = props.tag_config
 
     # Create meta data service
-    meta_data_service = MetaDataService.MetaDataService(connection, archive_connection)
+    meta_data_service = MetaDataService.MetaDataService(
+        connection,
+        archive_connection,
+        props.database_config,
+        props.archive_database_config)
     meta_data_service.set_console_logger(console_logger)
     meta_data_service.set_file_logger(file_logger)
 

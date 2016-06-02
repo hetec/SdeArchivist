@@ -70,14 +70,16 @@ class SdeArchivistProperties:
             if self.__validate_db_config(dct["database_config"]):
                 return dct["database_config"]
             else:
-                raise ValueError("Missing database config entry (url, port, service, username, password)")
+                raise ValueError("Missing database config entry "
+                                 "(url, port, service, username, password, request_table, content_table)")
 
     def __extract_archive_db_config(self, dct):
         if "archive_database_config" in dct:
             if self.__validate_archive_db_config(dct["archive_database_config"]):
                 return dct["archive_database_config"]
             else:
-                raise ValueError("Missing archive database config entry (url, port, service, username, password)")
+                raise ValueError("Missing archive database config entry "
+                                 "(url, port, service, username, password, meta_data_table)")
 
     def __extract_ldap_config(self, dct):
         if "ldap_config" in dct:
@@ -165,6 +167,8 @@ class SdeArchivistProperties:
         if "username" not in config:
             valid_config = False
         if "password" not in config:
+            valid_config = False
+        if "meta_data_table" not in config:
             valid_config = False
         return valid_config
 
