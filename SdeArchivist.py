@@ -280,7 +280,7 @@ if __name__ == "__main__":
     required_tags = props.tag_config
 
     # Create meta data service
-    meta_data_service = MetaDataService.MetaDataService(connection)
+    meta_data_service = MetaDataService.MetaDataService(connection, archive_connection)
     meta_data_service.set_console_logger(console_logger)
     meta_data_service.set_file_logger(file_logger)
 
@@ -441,6 +441,7 @@ if __name__ == "__main__":
                         console_logger.info(STEP7)
                         file_logger.info(STEP7)
                         try:
+                            meta_data_service.add_meta_data(validated_meta)
                             indexer.index(str(xml), validated_meta)
                         except Exception as e:
                             inform_admin(e, ms)

@@ -10,14 +10,16 @@ class MetaDataService:
     meta data, request table and content table
     """
 
-    def __init__(self, connection):
+    def __init__(self, connection, archive_connection):
         """
         Creates a new MetaDataService instance
 
         :param connection: A connection object (cx_Oracle connection object)
+        :param archive_connection: A connection object for the archive db (cx_Oracle connection object)
         :return: New MetaDataService
         """
         self.con = connection
+        self.a_con = archive_connection
 
     def set_console_logger(self, console_logger):
         """
@@ -334,45 +336,57 @@ class MetaDataService:
         :return: ID of the entry (Integer)
         :exception: DataException
         """
-        self.__c_logger.info("Add process information to the content table")
-        self.__f_logger.info("Add process information to the content table")
+        self.__c_logger.info("Insert meta data into db")
+        self.__f_logger.info("Insert meta data into db")
         cur = None
-        did = self.find_max_id()
 
         try:
-            query = "INSERT INTO sde_meta_data (title, topic, description, " \
+            query = "INSERT INTO " \
+                "SDE.SDE_META_DATA (title, topic, description, " \
                 "contact_name, contact_organisation, contact_position, contact_role, creation_date, content_lang, " \
                 "bounding_box_west, bounding_box_east, bounding_box_north, bounding_box_south) " \
-                "VALUES (:title, :topic, :desc, :name, :org, :pos, :role, :date, :lang, :west, :east, :north, :south);"
-            cur = self.con.cursor()
-            cur_date = datetime.date.today()
+                "VALUES (:title, :topic, :description, :contact_name, :org, :pos, :role, :create_date, :lang, :west, :east, :north, :south)"
+            cur = self.a_con.cursor()
             cur.prepare(query)
             cur.execute(None, {
-                'title': self.__check_meta_data_value(meta_data, 'Metadata/Contact/Name'),
-                'org': self.__check_meta_data_value(meta_data, 'Metadata/Contact/Organisation'),
-                'title': self.__check_meta_data_value(meta_data, 'Metadata/Contact/Name'),
-                'title': self.__check_meta_data_value(meta_data, 'Metadata/Contact/Name'),
-                'title': self.__check_meta_data_value(meta_data, 'Metadata/Contact/Name'),
-                'title': self.__check_meta_data_value(meta_data, 'Metadata/Contact/Name'),
+                'title': self.__check_meta_data_value(meta_data, 'title'),
+                'topic': self.__check_meta_data_value(meta_data, 'topic'),
+                'description': self.__check_meta_data_value(meta_data, 'description'),
+                'contact_name': self.__check_meta_data_value(meta_data, 'contact_name'),
+                'pos': self.__check_meta_data_value(meta_data, 'contact_position'),
+                'org': self.__check_meta_data_value(meta_data, 'contact_organisation'),
+                'role': self.__check_meta_data_value(meta_data, 'contact_role'),
+                'lang': self.__check_meta_data_value(meta_data, 'content_lang'),
+                'east': self.__check_meta_data_value(meta_data, 'bounding_box_east'),
+                'west': self.__check_meta_data_value(meta_data, 'bounding_box_west'),
+                'north': self.__check_meta_data_value(meta_data, 'bounding_box_north'),
+                'south': self.__check_meta_data_value(meta_data, 'bounding_box_south'),
+                'create_date': self.__check_meta_data_value(meta_data, 'creation_date')
             })
-            self.con.commit()
-            return did
-        except cx_Oracle.DatabaseError as e:
-            self.con.rollback()
+            self.a_con.commit()
+        except Exception as e:
             self.__c_logger.exception("EXCEPTION WHILE adding process information to the content table: " + str(e))
             self.__f_logger.exception("EXCEPTION WHILE adding process information to the content table: " + str(e))
+            try:
+                self.con.rollback()
+            except Exception as e:
+                raise DataException("Exception while adding a process to SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
             raise DataException("Exception while adding a process to SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
         finally:
             if cur is not None:
                 cur.close()
 
-
     def __check_meta_data_value(self, meta_data, value):
-        value = None
+        result_value = None
+        if str(value) not in meta_data.meta_data():
+            for key in meta_data.meta_data():
+                if str(value) == (str(key).split("$"))[0]:
+                    value = str(key)
         try:
-            value = meta_data.meta_data[value]
+            result_value = (meta_data.meta_data())[value]
+            result_value = (str(result_value).split("$"))[0]
         except Exception as e:
             self.__c_logger.exception("EXCEPTION WHILE setting a meta data value: " + str(value) + ": " + str(e))
             self.__f_logger.exception("EXCEPTION WHILE setting a meta data value: " + str(value) + ": " + str(e))
 
-        return value
+        return result_value

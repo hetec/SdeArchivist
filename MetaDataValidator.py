@@ -52,7 +52,7 @@ class MetaDataValidator:
                 print "ATTRIBUTE: " + str(attr)
                 value = attributes[str(attr)]
                 print "VALUE: " + str(value)
-                meta_data.add_meta_data(tag_config.tag_key() + "_" + str(attr), str(value))
+                meta_data.add_meta_data(tag_config.tag_key() + "$" + str(attr), str(value))
 
     def __validate_attribute(self, attribute_names, tag_name):
         attributes = tag_name.attrib
