@@ -30,7 +30,7 @@ class OracleConnection:
             connection = cx_Oracle.connect(self.__db_props["username"], self.__db_props["password"], url)
             return connection
         except Exception as e:
-            self.__c_logger.exception("Exception while connection to ORACLE: " + str(e))
-            self.__f_logger.exception("Exception while connection to ORACLE: " + str(e))
+            self.__c_logger.exception("Exception while connecting to ORACLE: " + str(e))
+            self.__f_logger.exception("Exception while connecting to ORACLE: " + str(e))
             raise Exception("Exception while connection to ORACLE: " + str(e))
 

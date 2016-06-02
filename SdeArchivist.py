@@ -25,6 +25,7 @@ from IndexRepeater import IndexRepeater
 from FailedIndexingCache import FailedIndexingCache
 from UserService import UserService
 from PermissionService import PermissionService
+import sys
 
 # Do not change this in the rest of the code!
 SDE_SOURCE_DB = "sde"
@@ -123,6 +124,7 @@ STEP9 = '''
 SUCCESS_MAIL_STATE = "success"
 FAILURE_MAIL_STATE = "failure"
 
+
 def handle_process_failure(cont_id,
                            req_id,
                            error,
@@ -191,6 +193,7 @@ def get_all_meta_data():
                      e.message, ms)
     return data
 
+
 def get_request_table_id(name, mail_sender):
     reqid = -1
     try:
@@ -247,13 +250,27 @@ if __name__ == "__main__":
     ora_con = OracleConnection(props.database_config)
     ora_con.set_console_logger(console_logger)
     ora_con.set_file_logger(file_logger)
-    connection = ora_con.connection()
+    try:
+        connection = ora_con.connection()
+    except Exception as e:
+        msg = "The program is not able to establish a connection to the archive sde database. " \
+              "Please check the log file for further information and a full stack trace"
+        ms.send_to_admin(msg)
+        print msg
+        sys.exit(1)
 
     # Get oracle database connection
     archive_ora_con = OracleConnection(props.archive_database_config)
     archive_ora_con.set_console_logger(console_logger)
     archive_ora_con.set_file_logger(file_logger)
-    archive_connection = archive_ora_con.connection()
+    try:
+        archive_connection = archive_ora_con.connection()
+    except Exception as e:
+        msg = "The program is not able to establish a connection to the archive sde database. " \
+              "Please check the log file for further information and a full stack trace"
+        ms.send_to_admin(msg)
+        print msg
+        sys.exit(2)
 
     # Establish ldap connection
     ldap = LdapService.LdapService(props.ldap_config)
@@ -273,10 +290,24 @@ if __name__ == "__main__":
     connection_generator_sdearchive.set_console_logger(console_logger)
 
     # Create or reuse sde connections files
-    sdeCon = connection_generator_sde.connect()
-    archive_con = connection_generator_sdearchive.connect()
+    try:
+        sdeCon = connection_generator_sde.connect()
+    except Exception as e:
+        msg = "The program is not able to establish a connection to the sde (create sde file). " \
+              "Please check the log file for further information and a full stack trace"
+        ms.send_to_admin(msg)
+        print msg
+        sys.exit(3)
+    try:
+        archive_con = connection_generator_sdearchive.connect()
+    except Exception as e:
+        msg = "The program is not able to establish a connection to the archive sde (create sde file). " \
+              "Please check the log file for further information and a full stack trace"
+        ms.send_to_admin(msg)
+        print msg
+        sys.exit(4)
 
-    # Get the required tags for the meta data from the conifig file
+    # Get the required tags for the meta data from the config file
     required_tags = props.tag_config
 
     # Create meta data service
@@ -499,7 +530,8 @@ if __name__ == "__main__":
                 # Send a mail to inform about the invalid metadata
                 out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
                 # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out, FAILURE_MAIL_STATE)
-                ms.send("patrick.hebner@ufz.de", "FAILED! The meta data of '" + str(xml) + "' are invalid: \n\n" + out, FAILURE_MAIL_STATE)
+                ms.send("patrick.hebner@ufz.de", "FAILED! The meta data of '" + str(xml) + "' are invalid: \n\n" + out,
+                        FAILURE_MAIL_STATE)
 
             # Remove the buffered file
             cleaner.clear_file(str(xml) + XML_EXTENSION)
@@ -527,7 +559,7 @@ if __name__ == "__main__":
                 console_logger.debug(str(entry) + " is in DB: " + str(exists))
                 file_logger.debug(str(entry) + " is in DB: " + str(exists))
             except Exception as e:
-                    inform_admin("Exception while checking the existence of remaining datasets: " + str(e), ms)
+                inform_admin("Exception while checking the existence of remaining datasets: " + str(e), ms)
 
             # If available -> the entry is a duplicate of an already archived one
             if exists:
@@ -558,7 +590,6 @@ if __name__ == "__main__":
                     handle_process_failure(contid, reqid, e,
                                            "CORRUPT (NOT ABLE TO UPDATE TABLES)",
                                            ms)
-
 
     # Remove all remaining files from the buffer
     cleaner.clear_all(BUFFER_DIR)

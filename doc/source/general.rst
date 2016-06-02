@@ -242,6 +242,14 @@ Data Types
 
 Achievable data types: 'Feature Dataset', 'Raster Dataset', 'Table', 'Raster Catalog', 'Mosaic Dataset'
 
+
+Exit Codes
+----------
+
+**0** - Program finished successfully
+**1** - Problem with the original sde database. The program is not able to establish a connection
+**2** - Problem with the archive sde database. The program is not able to establish a connection
+
 Known Problems
 --------------
 
