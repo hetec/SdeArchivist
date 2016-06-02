@@ -476,7 +476,7 @@ if __name__ == "__main__":
                         console_logger.info(STEP7)
                         file_logger.info(STEP7)
                         try:
-                            meta_data_service.add_meta_data(validated_meta)
+                            meta_data_service.add_meta_data(validated_meta, str(xml))
                             indexer.index(str(xml), validated_meta)
                         except Exception as e:
                             inform_admin(e, ms)

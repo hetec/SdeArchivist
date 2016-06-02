@@ -332,7 +332,7 @@ class MetaDataService:
             if cur is not None:
                 cur.close()
 
-    def add_meta_data(self, meta_data):
+    def add_meta_data(self, meta_data, arch_title):
         """
         Add required and optional meta data to the database
 
@@ -345,14 +345,18 @@ class MetaDataService:
 
         try:
             query = "INSERT INTO " \
-                "SDE." + self.arch_config['meta_data_table'] + " (title, topic, description, " \
+                "SDE." + self.arch_config['meta_data_table'] + " (archive_title, title, topic, description, " \
                 "contact_name, contact_organisation, contact_position, contact_role, creation_date, content_lang, " \
-                "bounding_box_west, bounding_box_east, bounding_box_north, bounding_box_south) " \
-                "VALUES (:title, :topic, :description, :contact_name, :org, " \
-                ":pos, :role, :create_date, :lang, :west, :east, :north, :south)"
+                "bounding_box_west, bounding_box_east, bounding_box_north, bounding_box_south, " \
+                "spatial_representation_type, spatial_reference_version, spatial_reference_space, " \
+                "spatial_reference_code, maintenance_update_frequency, maintenance_note) " \
+                "VALUES (:arch_title, :title, :topic, :description, :contact_name, :org, " \
+                ":pos, :role, :create_date, :lang, :west, :east, :north, :south, " \
+                ":sr_type, :sr_code, :sr_version, :sr_space, :m_freq, :m_note)"
             cur = self.a_con.cursor()
             cur.prepare(query)
             cur.execute(None, {
+                'arch_title' : str(arch_title),
                 'title': self.__check_meta_data_value(meta_data, 'title'),
                 'topic': self.__check_meta_data_value(meta_data, 'topic'),
                 'description': self.__check_meta_data_value(meta_data, 'description'),
@@ -365,17 +369,23 @@ class MetaDataService:
                 'west': self.__check_meta_data_value(meta_data, 'bounding_box_west'),
                 'north': self.__check_meta_data_value(meta_data, 'bounding_box_north'),
                 'south': self.__check_meta_data_value(meta_data, 'bounding_box_south'),
-                'create_date': self.__check_meta_data_value(meta_data, 'creation_date')
+                'create_date': self.__check_meta_data_value(meta_data, 'creation_date'),
+                'sr_type': self.__check_meta_data_value(meta_data, 'spatial_representation_type'),
+                'sr_version': self.__check_meta_data_value(meta_data, 'spatial_reference_version'),
+                'sr_space': self.__check_meta_data_value(meta_data, 'spatial_reference_space'),
+                'sr_code': self.__check_meta_data_value(meta_data, 'spatial_reference_code'),
+                'm_freq': self.__check_meta_data_value(meta_data, 'maintenance_frequency'),
+                'm_note': self.__check_meta_data_value(meta_data, 'maintenance_note')
             })
             self.a_con.commit()
         except Exception as e:
-            self.__c_logger.exception("EXCEPTION WHILE adding process information to the content table: " + str(e))
-            self.__f_logger.exception("EXCEPTION WHILE adding process information to the content table: " + str(e))
+            self.__c_logger.exception("EXCEPTION while inserting meta data into db: " + str(e))
+            self.__f_logger.exception("EXCEPTION while inserting meta data into db: " + str(e))
             try:
                 self.con.rollback()
             except Exception as e:
-                raise DataException("Exception while adding a process to SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
-            raise DataException("Exception while adding a process to SDE.ARCHIVE_CONTENT_EVW: \n" + str(e))
+                raise DataException("Exception while inserting meta data into db: \n" + str(e))
+            raise DataException("Exception while inserting meta data into db: \n" + str(e))
         finally:
             if cur is not None:
                 cur.close()

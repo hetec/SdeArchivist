@@ -5,6 +5,7 @@ DROP TABLE sde_meta_data CASCADE CONSTRAINTS PURGE;
 CREATE TABLE sde_meta_data (
   id NUMBER(19),
   -- required values
+  archive_title VARCHAR2(1000 char) NOT NULL UNIQUE,
   title VARCHAR2(1000 char) NOT NULL,
   topic VARCHAR2(1000 char) NOT NULL,
   description CLOB NOT NULL,
@@ -19,11 +20,11 @@ CREATE TABLE sde_meta_data (
   bounding_box_north VARCHAR2(1000 char) NOT NULL,
   bounding_box_south VARCHAR2(1000 char) NOT NULL,
   -- optional values
-  special_representation_type VARCHAR2(1000 char),
-  special_reference_version VARCHAR2(1000 char),
-  special_reference_space VARCHAR2(1000 char),
-  special_reference_code VARCHAR2(1000 char),
-  maintenance_update_fequency VARCHAR2(1000 char),
+  spatial_representation_type VARCHAR2(1000 char),
+  spatial_reference_version VARCHAR2(1000 char),
+  spatial_reference_space VARCHAR2(1000 char),
+  spatial_reference_code VARCHAR2(1000 char),
+  maintenance_update_frequency VARCHAR2(1000 char),
   maintenance_note CLOB,
   CONSTRAINT check_pk_range 
     CHECK(id BETWEEN -9223372036854775808 AND 9223372036854775807),
@@ -47,7 +48,9 @@ BEGIN :NEW.id := seq_sde_meta_data.NEXTVAL;
 END;
 /
 
+-- example data
 INSERT INTO sde_meta_data (
+archive_title,
 title,
 topic,
 description,
@@ -61,6 +64,7 @@ bounding_box_west,
 bounding_box_east,
 bounding_box_north,
 bounding_box_south) VALUES (
+'test_arch_title',
 'test_title',
 'test_desc',
 'test_topic1, test_topic2',
