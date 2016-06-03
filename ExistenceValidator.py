@@ -9,7 +9,7 @@ class ExistenceValidator:
     Verifies the existence of files and directories
     """
 
-    def __init__(self,):
+    def __init__(self):
         pass
 
     def set_console_logger(self, console_logger):

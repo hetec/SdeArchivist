@@ -10,18 +10,18 @@ class DatasetRenameService:
 
     """
 
-    def __init__(self, archiveProperties, existenceValidator):
+    def __init__(self, archive_properties, existence_validator):
         """
         Create a new instance of the DatasetRenameService
 
-        :param archiveProperties: A map with the property data for the sde archive
-        :param existenceValidator: An existence validator instance
+        :param archive_properties: A map with the property data for the sde archive
+        :param existence_validator: An existence validator instance
         :return: Name with counter (String)
         """
-        self.__path = archiveProperties["project_root"] + "/config/sdearchive.sde/"
-        self.__validator = existenceValidator
+        self.__path = archive_properties["project_root"] + "/config/sdearchive.sde/"
+        self.__validator = existence_validator
 
-    def __checkExistenceAndIncr(self, name):
+    def __check_existence_and_incr(self, name):
         counter = 1
         temp_name = name
         while self.__validator.imported_sde_data_exists("sdearchive", temp_name):
@@ -42,7 +42,7 @@ class DatasetRenameService:
         self.__c_logger.debug("Old dataset name in sde archive: " + old_name)
         self.__f_logger.debug("Old dataset name in sde archive: " + old_name)
         new_name = old_name + "_" + data.split(".")[0]
-        new_name = self.__checkExistenceAndIncr(new_name)
+        new_name = self.__check_existence_and_incr(new_name)
 
         self.__c_logger.debug("Try to rename to new dataset name: " + new_name)
         self.__f_logger.debug("Try to rename to new dataset name: " + new_name)
