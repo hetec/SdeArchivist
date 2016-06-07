@@ -35,6 +35,7 @@ CONFIG_DIR = "config"
 CONFIG_FILE_NAME = "archivist_config.json"
 XML_EXTENSION = ".xml"
 DEFAULT_PW = "test"
+MAIL_ACTIVE = True
 
 ASCII = '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -214,6 +215,18 @@ def add_to_content_table(name, reqid, mail_sender):
     return contid
 
 
+def inform_user(name, content, state, mail_sender, console_logger, file_logger, active=False):
+    if active:
+        try:
+            mail_sender.send(ldap.get_email_by_uid(str(name)), content, state)
+        except Exception as e:
+            message = "Cannot send an email to the user " + str(name)
+            console_logger.error("ERROR " + str(message) + "\n" + str(e))
+            file_logger.error("ERROR " + str(message) + "\n" + str(e))
+            inform_admin(message, mail_sender)
+    else:
+        inform_admin("(inactive user mail) " + content, mail_sender)
+
 if __name__ == "__main__":
 
     # Get config from config/archivist_config.json
@@ -351,6 +364,12 @@ if __name__ == "__main__":
     # Search is based on the data name
     raw_meta = get_all_meta_data()
 
+    #Username
+    org_name = None
+
+    #Original data set name
+    old_name = None
+
     # If there are at one or more entries in the database table continue for each meta data entry
     if len(raw_meta) > 0:
         console_logger.info(STEP3)
@@ -466,6 +485,7 @@ if __name__ == "__main__":
                         renameService.setFileLogger(file_logger)
 
                         # rename the xml file
+                        old_name = str(xml)
                         org_name = xml.split(".")[0]
                         xml = renameService.rename(xml)
 
@@ -473,7 +493,7 @@ if __name__ == "__main__":
                         console_logger.info(STEP7)
                         file_logger.info(STEP7)
                         try:
-                            if archive_conf["export_meta_data_to_database"]:
+                            if props.archive_database_config["export_meta_data_to_database"]:
                                 console_logger.info("EXPORT of meta data to db")
                                 file_logger.info("EXPORT of meta data to db")
                                 meta_data_service.add_meta_data(validated_meta, str(xml))
@@ -494,7 +514,15 @@ if __name__ == "__main__":
                             # Update the name column in the content table to the name after the renaming process
                             meta_data_service.update_name(content_table_id, xml)
                             # Send success mail
-                            ms.send("patrick.hebner@ufz.de", "SUCCESS", SUCCESS_MAIL_STATE)
+                            inform_user(org_name,
+                                        "Archiving of " + str(old_name) + " has been successfully completed! " +
+                                        "You can find your data in the archive under the name: " + str(xml),
+                                        SUCCESS_MAIL_STATE,
+                                        ms,
+                                        console_logger,
+                                        file_logger,
+                                        MAIL_ACTIVE)
+                            #ms.send("patrick.hebner@ufz.de", "SUCCESS", SUCCESS_MAIL_STATE)
 
                             console_logger.info(STEP8)
                             file_logger.info(STEP8)
@@ -538,9 +566,16 @@ if __name__ == "__main__":
 
                 # Send a mail to inform about the invalid metadata
                 out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
+                inform_user(org_name,
+                            "Archiving of " + str(xml) + " failed\n\n" + out,
+                            FAILURE_MAIL_STATE,
+                            ms,
+                            console_logger,
+                            file_logger,
+                            MAIL_ACTIVE)
                 # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out, FAILURE_MAIL_STATE)
-                ms.send("patrick.hebner@ufz.de", "FAILED! The meta data of '" + str(xml) + "' are invalid: \n\n" + out,
-                        FAILURE_MAIL_STATE)
+                #ms.send("patrick.hebner@ufz.de", "FAILED! The meta data of '" + str(xml) + "' are invalid: \n\n" + out,
+                        #FAILURE_MAIL_STATE)
 
             # Remove the buffered file
             cleaner.clear_file(str(xml) + XML_EXTENSION)
