@@ -1,6 +1,7 @@
 # -*- encoding utf-8 -*-
 import json
 
+
 class BunchDict(dict):
     """
     Data container class to hold dynamic meta data
@@ -8,6 +9,7 @@ class BunchDict(dict):
     def __init__(self,**kw):
         dict.__init__(self,kw)
         self.__dict__.update(kw)
+
 
 class SearchableMetaData:
     """

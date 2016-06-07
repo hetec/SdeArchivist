@@ -29,7 +29,6 @@ class SdeArchivistProperties:
         self.mail_config = {}
         self.sde_config = {}
         self.sdearchive_config = {}
-        self.ldap_config = {}
         self.log_config = {}
         self.elasticsearch_config = {}
         self.__read_config()
@@ -79,7 +78,8 @@ class SdeArchivistProperties:
                 return dct["archive_database_config"]
             else:
                 raise ValueError("Missing archive database config entry "
-                                 "(url, port, service, username, password, meta_data_table)")
+                                 "(url, port, service, username, password, meta_data_table,"
+                                 " export_meta_data_to_database)")
 
     def __extract_ldap_config(self, dct):
         if "ldap_config" in dct:
@@ -94,8 +94,10 @@ class SdeArchivistProperties:
                 return dct["mail_config"]
             else:
                 raise ValueError("Missing mail config entry "
-                                 "(smtp_server, port, from, subject, get_user_process_info, password, failure_subject, success_subject,"
-                                 " default_message, admin_recipients)")
+                                 "(smtp_server, port, from, subject, get_user_process_info,"
+                                 " password, failure_subject, success_subject,"
+                                 " default_message, admin_recipients,"
+                                 "send_mails_to_user)")
 
     def __extract_sde_config(self, dct):
         if "sde_config" in dct:
@@ -128,7 +130,7 @@ class SdeArchivistProperties:
                 return dct["elasticsearch_config"]
             else:
                 raise ValueError("Missing log config entry "
-                                 "(host, index, type")
+                                 "(host, index, type, activated")
 
     def __validate_reqired_tag_config(self, config):
         valid_config = True
@@ -170,6 +172,8 @@ class SdeArchivistProperties:
             valid_config = False
         if "meta_data_table" not in config:
             valid_config = False
+        if "export_meta_data_to_database" not in config:
+            valid_config = False
         return valid_config
 
     def __validate_mail_config(self, config):
@@ -193,6 +197,8 @@ class SdeArchivistProperties:
         if "success_subject" not in config:
             valid_config = False
         if "admin_recipients" not in config:
+            valid_config = False
+        if "send_mails_to_user" not in config:
             valid_config = False
         return valid_config
 
@@ -270,6 +276,8 @@ class SdeArchivistProperties:
         if "index" not in config:
             valid_config = False
         if "type" not in config:
+            valid_config = False
+        if "activated" not in config:
             valid_config = False
         return valid_config
 

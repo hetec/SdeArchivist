@@ -43,7 +43,8 @@ The archivist_config.json file
     "elasticsearch_config": {
         "host": "The elasitcsearch server url",
         "index": "index name",
-        "type": "type name"
+        "type": "type name",
+        "activated": false
     },
     "ldap_config" : {
         "server" : "ldap server url",
@@ -68,7 +69,7 @@ The archivist_config.json file
         "log_file_count" : 3 number of files which are retained
     },
       "tag_config" : {
-    "tags" : [
+        "tags" : [
           {
             "key": "title",
             "tag_name" : "DataProperties/itemProps/itemName",
@@ -233,12 +234,12 @@ It is possible to specify tags in the config file by name and by xml path.
 2. By XML path: <parentTag><oneChildTag><DesiredTag>?§$%-*"!?</...></...></...>
 
 1.
-    If you use the tagname version you should be aware of behavior since this method checks
+    If you use the tag name version you should be aware of the behavior since this method checks
     all existing tags regardless of their positions in the XML tree. So if there are multiple tags
     with the same name they all need to pass the test to get positive validation result.
 
 2.
-    If you use a path to specify you would only target all tags which match to the given path. The path is relative
+    If you use a path you only target all tags which match to the given path. The path is relative
     to the root element of the meta data XML (In the case of SDE meta data this is the <metadata> tag). Thus this tag
     may not be part of your path
 
@@ -328,19 +329,19 @@ Naming schema
 
 The data sets will be renamed during the coping process:
 
-USERNAME.dataname --> SDE.dataname_USERNAME
+USERNAME.dataname --> SDE.USERNAME_dataname
 
 If the name of the data set already exists, a counter will be appended:
 
-USERNAME.dataname --> SDE.dataname_USERNAME_1
+USERNAME.dataname --> SDE.USERNAME_dataname_1
 
-USERNAME.dataname --> SDE.dataname_USERNAME_2
+USERNAME.dataname --> SDE.USERNAME_dataname_2
 
 ...
 
-USERNAME.dataname --> SDE.dataname_USERNAME_999
+USERNAME.dataname --> SDE.USERNAME_dataname_999
 
-USERNAME.dataname --> SDE.dataname_USERNAME_1000
+USERNAME.dataname --> SDE.USERNAME_dataname_1000
 
 
 Exit Codes

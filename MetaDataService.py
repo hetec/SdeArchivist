@@ -120,7 +120,7 @@ class MetaDataService:
             query = "SELECT i.NAME, t.NAME, i.DOCUMENTATION " \
                     "FROM SDE.GDB_ITEMS_VW i LEFT JOIN SDE.GDB_ITEMTYPES t " \
                     "ON i.Type = t.UUID " \
-                    "WHERE i.NAME IN (SELECT r.NAME_OF_DATASET FROM SDE.ARCHIVE_ORDERS_EVW r)" \
+                    "WHERE i.NAME IN (SELECT r.NAME_OF_DATASET FROM SDE." + self.db_config["request_table"] + " r)" \
                     "AND t.NAME IN ('Feature Dataset', 'Raster Dataset', 'Table', 'Raster Catalog', 'Mosaic Dataset') " \
                     "AND length(i.DOCUMENTATION) > 1 " \
                     "AND i.DOCUMENTATION IS NOT NULL "
@@ -231,7 +231,7 @@ class MetaDataService:
                     " (OBJECTID, NAME_OF_DATASET, DATE_OF_ARCHIVING, REMARKS, NAME_OF_DATASET_ORIGINAL) " \
                     "VALUES (:data_id, :data_name, :req_date, :remarks, :org)"
             cur = self.con.cursor()
-            cur_date = datetime.date.today()
+            cur_date = datetime.datetime.now()#datetime.date.today()
             cur.prepare(query)
             cur.execute(None, {'data_id': did, 'data_name': dataset_name, 'req_date': cur_date, 'remarks': remarks,
                                'org': org_name})

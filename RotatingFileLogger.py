@@ -20,9 +20,9 @@ class RotatingFileLogger(GenericLogger):
         :param backup_files: Max number of backed up files (Integer)
         :return: RotatingFileHandler
         """
-        console_handler = logging.handlers.RotatingFileHandler(filename=file,
+        file_handler = logging.handlers.RotatingFileHandler(filename=file,
                                                                maxBytes=max_bytes,
                                                                backupCount=backup_files)
-        console_handler.setLevel(level)
-        console_handler.setFormatter(formatter)
-        return console_handler
+        file_handler.setLevel(level)
+        file_handler.setFormatter(formatter)
+        return file_handler

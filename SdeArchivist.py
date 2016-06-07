@@ -35,6 +35,9 @@ CONFIG_DIR = "config"
 CONFIG_FILE_NAME = "archivist_config.json"
 XML_EXTENSION = ".xml"
 DEFAULT_PW = "test"
+MAIL_ACTIVE = True
+SUCCESS_MAIL_STATE = "success"
+FAILURE_MAIL_STATE = "failure"
 
 ASCII = '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -99,9 +102,9 @@ STEP6 = '''
 
 STEP7 = '''
 
-**************************************
-* Add the meta data to elasticsearch *
-**************************************
+********************************************
+* Export meta data to db and elasticsearch *
+********************************************
 
 '''
 
@@ -120,10 +123,6 @@ STEP9 = '''
 ***********************************************
 
 '''
-
-SUCCESS_MAIL_STATE = "success"
-FAILURE_MAIL_STATE = "failure"
-
 
 def handle_process_failure(cont_id,
                            req_id,
@@ -214,6 +213,18 @@ def add_to_content_table(name, reqid, mail_sender):
     return contid
 
 
+def inform_user(name, content, state, mail_sender, console_logger, file_logger, active=False):
+    if active:
+        try:
+            mail_sender.send(ldap.get_email_by_uid(str(name)), content, state)
+        except Exception as e:
+            message = "Cannot send an email to the user " + str(name)
+            console_logger.error("ERROR " + str(message) + "\n" + str(e))
+            file_logger.error("ERROR " + str(message) + "\n" + str(e))
+            inform_admin(message, mail_sender)
+    else:
+        inform_admin("(inactive user mail) " + content, mail_sender)
+
 if __name__ == "__main__":
 
     # Get config from config/archivist_config.json
@@ -223,11 +234,11 @@ if __name__ == "__main__":
     console_logger = ArchivistLogger.ArchivistLogger(props.log_config).get_console_logger()
     file_logger = ArchivistLogger.ArchivistLogger(props.log_config).get_file_logger()
 
-    console_logger.debug(ASCII)
-    file_logger.debug(ASCII)
+    console_logger.error(ASCII)
+    file_logger.error(ASCII)
 
-    console_logger.debug(STEP1)
-    file_logger.debug(STEP1)
+    console_logger.error(STEP1)
+    file_logger.error(STEP1)
 
     # Create existence validator
     existenceValidator = ExistenceValidator.ExistenceValidator()
@@ -240,6 +251,9 @@ if __name__ == "__main__":
     ms = MailSender.MailSender(props.mail_config)
     ms.set_console_logger(console_logger)
     ms.set_file_logger(file_logger)
+
+    if not props.mail_config["send_mails_to_user"]:
+        MAIL_ACTIVE = False
 
     # Create directory cleaner
     cleaner = BufferCleaner.BufferCleaner()
@@ -256,7 +270,6 @@ if __name__ == "__main__":
         msg = "The program is not able to establish a connection to the archive sde database. " \
               "Please check the log file for further information and a full stack trace"
         ms.send_to_admin(msg)
-        print msg
         sys.exit(1)
 
     # Get oracle database connection
@@ -269,7 +282,6 @@ if __name__ == "__main__":
         msg = "The program is not able to establish a connection to the archive sde database. " \
               "Please check the log file for further information and a full stack trace"
         ms.send_to_admin(msg)
-        print msg
         sys.exit(2)
 
     # Establish ldap connection
@@ -296,7 +308,6 @@ if __name__ == "__main__":
         msg = "The program is not able to establish a connection to the sde (create sde file). " \
               "Please check the log file for further information and a full stack trace"
         ms.send_to_admin(msg)
-        print msg
         sys.exit(3)
     try:
         archive_con = connection_generator_sdearchive.connect()
@@ -304,7 +315,6 @@ if __name__ == "__main__":
         msg = "The program is not able to establish a connection to the archive sde (create sde file). " \
               "Please check the log file for further information and a full stack trace"
         ms.send_to_admin(msg)
-        print msg
         sys.exit(4)
 
     # Get the required tags for the meta data from the config file
@@ -335,33 +345,36 @@ if __name__ == "__main__":
     # Initialize permission service
     permission_service = PermissionService(archive_conf, SDE_ARCHIVE_DB)
 
-    console_logger.info("REINDEXING")
-    file_logger.info("REINDEXING")
+    if elastic_config["activated"]:
+        console_logger.info("REINDEXING")
+        file_logger.info("REINDEXING")
 
-    IndexRepeater(FailedIndexingCache(), indexer).reindex()
+        IndexRepeater(FailedIndexingCache(), indexer).reindex()
+    else:
+        console_logger.info("ELASICSEARCH is deactivated")
+        file_logger.info("ELASICSEARCH is deactivated")
 
-    console_logger.info(STEP2)
-    file_logger.info(STEP2)
+    console_logger.error(STEP2)
+    file_logger.error(STEP2)
 
     # Get the meta data for all entries of the request table if they exist in the database
     # Search is based on the data name
     raw_meta = get_all_meta_data()
 
-    # try:
-    #     raw_meta = meta_data_service.find_meta_data_by_dataset_names()
-    # except Exception as e:
-    #     raw_meta = {}
-    #     inform_admin("Exception while fetching the meta data for the registered datasets: \n" +
-    #                  e, ms)
+    #Username
+    org_name = None
+
+    #Original data set name
+    old_name = None
 
     # If there are at one or more entries in the database table continue for each meta data entry
     if len(raw_meta) > 0:
-        console_logger.info(STEP3)
-        file_logger.info(STEP3)
+        console_logger.error(STEP3)
+        file_logger.error(STEP3)
         for xml in raw_meta:
 
             console_logger.info("\n>>> PROCESSING " + str(xml) + " <<<\n")
-            file_logger.debug("\n>>> PROCESSING " + str(xml) + " <<<\n")
+            file_logger.info("\n>>> PROCESSING " + str(xml) + " <<<\n")
 
             # Get the id of the row in the request table
             console_logger.debug("Fetch the ID of the current entry")
@@ -380,8 +393,8 @@ if __name__ == "__main__":
                 continue
 
             # Verify the current meta data against the required tags specified in the config file
-            console_logger.info(STEP4)
-            file_logger.info(STEP4)
+            console_logger.error(STEP4)
+            file_logger.error(STEP4)
 
             # Meta data object to hold information about the current meta data
             validated_meta = MetaData.MetaData()
@@ -397,8 +410,8 @@ if __name__ == "__main__":
             # Ask the meta data object if there are some issues. If not continue.
             if validated_meta.is_valid():
 
-                console_logger.info(STEP5)
-                file_logger.info(STEP5)
+                console_logger.error(STEP5)
+                file_logger.error(STEP5)
 
                 # Try to export the data to a xml workspace document into the buffer directory
                 try:
@@ -421,8 +434,8 @@ if __name__ == "__main__":
 
                 if existenceValidator.buffered_xml_exists(str(xml) + ".xml"):
                     try:
-                        console_logger.info(STEP6)
-                        file_logger.info(STEP6)
+                        console_logger.error(STEP6)
+                        file_logger.error(STEP6)
 
                         # Create the importer
                         importer = XmlWorkspaceImporter.XmlWorkspaceImporter(archive_conf, SDE_ARCHIVE_DB)
@@ -469,6 +482,7 @@ if __name__ == "__main__":
                         renameService.setFileLogger(file_logger)
 
                         # rename the xml file
+                        old_name = str(xml)
                         org_name = xml.split(".")[0]
                         xml = renameService.rename(xml)
 
@@ -476,8 +490,20 @@ if __name__ == "__main__":
                         console_logger.info(STEP7)
                         file_logger.info(STEP7)
                         try:
-                            meta_data_service.add_meta_data(validated_meta, str(xml))
-                            indexer.index(str(xml), validated_meta)
+                            if props.archive_database_config["export_meta_data_to_database"]:
+                                console_logger.info("EXPORT of meta data to db")
+                                file_logger.info("EXPORT of meta data to db")
+                                meta_data_service.add_meta_data(validated_meta, str(xml))
+                            else:
+                                console_logger.info("EXPORT of meta data to db is deactivated")
+                                file_logger.info("EXPORT of meta data to db is deactivated")
+                            if elastic_config["activated"]:
+                                console_logger.info("INDEXING to es")
+                                file_logger.info("INDEXING to es")
+                                indexer.index(str(xml), validated_meta)
+                            else:
+                                console_logger.info("INDEXING to es deactivated")
+                                file_logger.info("INDEXING to es deactivated")
                         except Exception as e:
                             inform_admin(e, ms)
 
@@ -485,12 +511,19 @@ if __name__ == "__main__":
                             # Update the name column in the content table to the name after the renaming process
                             meta_data_service.update_name(content_table_id, xml)
                             # Send success mail
-                            ms.send("patrick.hebner@ufz.de", "SUCCESS", SUCCESS_MAIL_STATE)
+                            inform_user(org_name,
+                                        "Archiving of " + str(old_name) + " has been successfully completed! " +
+                                        "You can find your data in the archive under the name: " + str(xml),
+                                        SUCCESS_MAIL_STATE,
+                                        ms,
+                                        console_logger,
+                                        file_logger,
+                                        MAIL_ACTIVE)
+                            #ms.send("patrick.hebner@ufz.de", "SUCCESS", SUCCESS_MAIL_STATE)
 
-                            console_logger.info(STEP8)
-                            file_logger.info(STEP8)
+                            console_logger.error(STEP8)
+                            file_logger.error(STEP8)
 
-                            print "CREATE USER"
                             try:
                                 user_service.create_user(org_name)
                                 permission_service.grant_read_permission(str(org_name), str(xml))
@@ -529,9 +562,16 @@ if __name__ == "__main__":
 
                 # Send a mail to inform about the invalid metadata
                 out = MetaDataRenderer.MetaDataRenderer(validated_meta).render_txt_table()
+                inform_user(org_name,
+                            "Archiving of " + str(xml) + " failed\n\n" + out,
+                            FAILURE_MAIL_STATE,
+                            ms,
+                            console_logger,
+                            file_logger,
+                            MAIL_ACTIVE)
                 # ms.send(ldap.get_email_by_uid(xml.split(".")[0]), out, FAILURE_MAIL_STATE)
-                ms.send("patrick.hebner@ufz.de", "FAILED! The meta data of '" + str(xml) + "' are invalid: \n\n" + out,
-                        FAILURE_MAIL_STATE)
+                #ms.send("patrick.hebner@ufz.de", "FAILED! The meta data of '" + str(xml) + "' are invalid: \n\n" + out,
+                        #FAILURE_MAIL_STATE)
 
             # Remove the buffered file
             cleaner.clear_file(str(xml) + XML_EXTENSION)
@@ -541,8 +581,8 @@ if __name__ == "__main__":
         file_logger.debug("No meta data found for the entries of the request table")
 
     # Get the remaining entries of the request table
-    console_logger.info(STEP9)
-    file_logger.info(STEP9)
+    console_logger.error(STEP9)
+    file_logger.error(STEP9)
 
     # Fetch remaining entries
     remaining = meta_data_service.find_all_requests()

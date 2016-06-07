@@ -36,14 +36,14 @@ class LdapService:
         :exception: Exception if an error occurs while connecting to ldap
         """
         try:
-            res = self.__ldapObj.search_s(self.__props["dn"],ldap.SCOPE_SUBTREE,"uid=" + uid)
-            self.__c_logger.debug("Get email address for " + uid +": " + res)
-            self.__f_logger.debug("Get email address for " + uid +": " + res)
+            res = self.__ldapObj.search_s(self.__props["dn"], ldap.SCOPE_SUBTREE, "uid=" + uid)
+            self.__c_logger.debug("Get email address for " + uid)
+            self.__f_logger.debug("Get email address for " + uid)
         except Exception as e:
             self.__c_logger.exception("EXCEPTION while getting email address for " + uid + ": " + res + ": " + str(e))
             self.__f_logger.exception("EXCEPTION while getting email address for " + uid + ": " + res + ": " + str(e))
-            raise Exception("Not able to execute the search request on the server: '" + self.__props["server"]
-                            + "', ERROR: " + str(e.message))
+            raise Exception("Not able to execute the search request on the server: '" + self.__props["server"] +
+                            "', ERROR: " + str(e.message))
         if len(res) > 0 and res is not None:
             email = res[0][1]["mail"][0]
         else:

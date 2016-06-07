@@ -64,13 +64,13 @@ class MetaData:
         """
         return self.__is_valid
 
-    def __replace_existing_key_names(self, name):
-        temp_name = name
-        counter = 1
-        while str(temp_name) in self.meta_data():
-            temp_name = name + "_" + str(counter)
-            counter += 1
-        return temp_name
+    # def __replace_existing_key_names(self, name):
+    #     temp_name = name
+    #     counter = 1
+    #     while str(temp_name) in self.meta_data():
+    #         temp_name = name + "_" + str(counter)
+    #         counter += 1
+    #     return temp_name
 
     def __handle_duplicates(self, name, value):
         element_list = None
