@@ -78,7 +78,8 @@ class SdeArchivistProperties:
                 return dct["archive_database_config"]
             else:
                 raise ValueError("Missing archive database config entry "
-                                 "(url, port, service, username, password, meta_data_table)")
+                                 "(url, port, service, username, password, meta_data_table,"
+                                 " export_meta_data_to_database)")
 
     def __extract_ldap_config(self, dct):
         if "ldap_config" in dct:
@@ -93,7 +94,8 @@ class SdeArchivistProperties:
                 return dct["mail_config"]
             else:
                 raise ValueError("Missing mail config entry "
-                                 "(smtp_server, port, from, subject, get_user_process_info, password, failure_subject, success_subject,"
+                                 "(smtp_server, port, from, subject, get_user_process_info,"
+                                 " password, failure_subject, success_subject,"
                                  " default_message, admin_recipients)")
 
     def __extract_sde_config(self, dct):
@@ -168,6 +170,8 @@ class SdeArchivistProperties:
         if "password" not in config:
             valid_config = False
         if "meta_data_table" not in config:
+            valid_config = False
+        if "export_meta_data_to_database" not in config:
             valid_config = False
         return valid_config
 

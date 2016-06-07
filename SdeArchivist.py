@@ -473,14 +473,20 @@ if __name__ == "__main__":
                         console_logger.info(STEP7)
                         file_logger.info(STEP7)
                         try:
-                            meta_data_service.add_meta_data(validated_meta, str(xml))
+                            if archive_conf["export_meta_data_to_database"]:
+                                console_logger.info("EXPORT of meta data to db")
+                                file_logger.info("EXPORT of meta data to db")
+                                meta_data_service.add_meta_data(validated_meta, str(xml))
+                            else:
+                                console_logger.info("EXPORT of meta data to db is deactivated")
+                                file_logger.info("EXPORT of meta data to db is deactivated")
                             if elastic_config["activated"]:
-                                console_logger.info("INDEXING")
-                                file_logger.info("INDEXING")
+                                console_logger.info("INDEXING to es")
+                                file_logger.info("INDEXING to es")
                                 indexer.index(str(xml), validated_meta)
                             else:
-                                console_logger.info("ELASTICSEARCH is deactivated")
-                                file_logger.info("ELASTICSEARCH is deactivated")
+                                console_logger.info("INDEXING to es deactivated")
+                                file_logger.info("INDEXING to es deactivated")
                         except Exception as e:
                             inform_admin(e, ms)
 

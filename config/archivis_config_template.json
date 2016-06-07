@@ -63,16 +63,19 @@
   "tag_config" : {
     "tags" : [
       {
+        "key" : "identifier",
         "tag_name" : "keyword",
         "mapped_name" : ""
       },
       {
+        "key" : "identifier",
         "tag_name" : "CharSetCd",
         "mapped_name" : "The new name",
         "is_empty" : true,
         "attributes" : ["value"]
       },
       {
+        "key" : "identifier",
        "tag_name" : "dataIdInfo/dataLang/languageCode",
        "mapped_name" : "",
        "is_empty" : true,
