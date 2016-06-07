@@ -99,9 +99,9 @@ STEP6 = '''
 
 STEP7 = '''
 
-**************************************
-* Add the meta data to elasticsearch *
-**************************************
+********************************************
+* Export meta data to db and elasticsearch *
+********************************************
 
 '''
 
@@ -335,10 +335,14 @@ if __name__ == "__main__":
     # Initialize permission service
     permission_service = PermissionService(archive_conf, SDE_ARCHIVE_DB)
 
-    console_logger.info("REINDEXING")
-    file_logger.info("REINDEXING")
+    if elastic_config["activated"]:
+        console_logger.info("REINDEXING")
+        file_logger.info("REINDEXING")
 
-    IndexRepeater(FailedIndexingCache(), indexer).reindex()
+        IndexRepeater(FailedIndexingCache(), indexer).reindex()
+    else:
+        console_logger.info("ELASICSEARCH is deactivated")
+        file_logger.info("ELASICSEARCH is deactivated")
 
     console_logger.info(STEP2)
     file_logger.info(STEP2)
@@ -470,7 +474,13 @@ if __name__ == "__main__":
                         file_logger.info(STEP7)
                         try:
                             meta_data_service.add_meta_data(validated_meta, str(xml))
-                            indexer.index(str(xml), validated_meta)
+                            if elastic_config["activated"]:
+                                console_logger.info("INDEXING")
+                                file_logger.info("INDEXING")
+                                indexer.index(str(xml), validated_meta)
+                            else:
+                                console_logger.info("ELASTICSEARCH is deactivated")
+                                file_logger.info("ELASTICSEARCH is deactivated")
                         except Exception as e:
                             inform_admin(e, ms)
 

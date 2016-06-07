@@ -127,7 +127,7 @@ class SdeArchivistProperties:
                 return dct["elasticsearch_config"]
             else:
                 raise ValueError("Missing log config entry "
-                                 "(host, index, type")
+                                 "(host, index, type, activated")
 
     def __validate_reqired_tag_config(self, config):
         valid_config = True
@@ -269,6 +269,8 @@ class SdeArchivistProperties:
         if "index" not in config:
             valid_config = False
         if "type" not in config:
+            valid_config = False
+        if "activated" not in config:
             valid_config = False
         return valid_config
 

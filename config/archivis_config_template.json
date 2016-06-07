@@ -51,7 +51,8 @@
   "elasticsearch_config": {
     "host": "",
     "index": "",
-    "type": ""
+    "type": "",
+    "activated": false
   },
   "log_config" : {
     "level" : "",

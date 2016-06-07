@@ -43,7 +43,8 @@ The archivist_config.json file
     "elasticsearch_config": {
         "host": "The elasitcsearch server url",
         "index": "index name",
-        "type": "type name"
+        "type": "type name",
+        "activated": false
     },
     "ldap_config" : {
         "server" : "ldap server url",
