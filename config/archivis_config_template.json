@@ -13,7 +13,8 @@
     "port" :  "",
     "service" :  "",
     "username" : "",
-    "password" : ""
+    "password" : "",
+    "meta_data_table": ""
   },
   "sde_config" : {
     "project_root" : "",

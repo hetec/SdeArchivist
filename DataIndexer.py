@@ -53,8 +53,8 @@ class DataIndexer:
 
             self.__c_logger.exception("ERROR while indexing data: " + str(data) + "\n\n" + e.message)
             self.__f_logger.exception("ERROR while indexing data: " + str(data) + "\n\n" + e.message)
-            raise IndexingException("ERROR while indexing data: " + str(data)
-                                    + " -> For more details see the log messages")
+            raise IndexingException("ERROR while indexing data: " + str(data) +
+                                    " -> For more details see the log messages")
 
     def index_from_json(self, json_string):
         """

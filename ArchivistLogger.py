@@ -19,7 +19,7 @@ class ArchivistLogger:
         self.__max_bytes = log_properties['log_file_size']
         self.__backup_files = log_properties['log_file_count']
         self.__console_logger = None
-        self.__rolling_file_logger = Noneback
+        self.__rolling_file_logger = None
 
     def get_console_logger(self):
         """

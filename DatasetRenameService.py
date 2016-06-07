@@ -41,7 +41,7 @@ class DatasetRenameService:
         old_name = "SDE." + data.split(".")[1]
         self.__c_logger.debug("Old dataset name in sde archive: " + old_name)
         self.__f_logger.debug("Old dataset name in sde archive: " + old_name)
-        new_name = old_name + "_" + data.split(".")[0]
+        new_name = "SDE." + data.split(".")[0] + "_" + data.split(".")[1]
         new_name = self.__check_existence_and_incr(new_name)
 
         self.__c_logger.debug("Try to rename to new dataset name: " + new_name)

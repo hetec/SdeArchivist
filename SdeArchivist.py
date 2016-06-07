@@ -347,13 +347,6 @@ if __name__ == "__main__":
     # Search is based on the data name
     raw_meta = get_all_meta_data()
 
-    # try:
-    #     raw_meta = meta_data_service.find_meta_data_by_dataset_names()
-    # except Exception as e:
-    #     raw_meta = {}
-    #     inform_admin("Exception while fetching the meta data for the registered datasets: \n" +
-    #                  e, ms)
-
     # If there are at one or more entries in the database table continue for each meta data entry
     if len(raw_meta) > 0:
         console_logger.info(STEP3)

@@ -105,14 +105,14 @@ class MetaDataValidator:
         if tag_instances:
             for tag in tag_instances:
                 msg = self.__validate_not_empty(tag, tag_name)
-                meta_data.add_meta_data_info(self.__getRightTagName(tag_name), msg)
+                meta_data.add_meta_data_info(self.__get_right_tag_name(tag_name), msg)
                 self.__getContent(tag_name, tag, meta_data)
                 if msg is not "OK" and meta_data.is_valid() is True:
                     meta_data.set_valid(False)
         else:
             self.__c_logger.info("MISSING: " + tag_name.tag_name())
             self.__f_logger.info("MISSING: " + tag_name.tag_name())
-            meta_data.add_meta_data_info(self.__getRightTagName(tag_name), "Missing")
+            meta_data.add_meta_data_info(self.__get_right_tag_name(tag_name), "Missing")
             if meta_data.is_valid() is True:
                 meta_data.set_valid(False)
         return tag_instances
@@ -148,7 +148,7 @@ class MetaDataValidator:
                 self.__c_logger.info("IS OPTIONAL: " + tag.tag_name())
                 self.__f_logger.info("IS OPTIONAL: " + tag.tag_name())
                 # Add OK to the meta data because optional tags are always considered as valid
-                meta_data.add_meta_data_info(self.__getRightTagName(tag), "OK")
+                meta_data.add_meta_data_info(self.__get_right_tag_name(tag), "OK")
                 # Get the content for the optional tag
                 self.__getContent(tag, instance, meta_data)
             return True
@@ -157,8 +157,7 @@ class MetaDataValidator:
             self.__f_logger.info("IS MANDATORY: " + tag.tag_name())
             return False
 
-
-    def __getRightTagName(self, tag):
+    def __get_right_tag_name(self, tag):
         if not tag.mapped_name():
             return tag.tag_name()
         else:

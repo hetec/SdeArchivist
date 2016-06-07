@@ -37,6 +37,7 @@ class SdeConnectionGenerator:
             return 1
         else:
             return 0
+
     def __create_new_sde_connection_file(self):
         self.__c_logger.info("CREATE SDE FILE")
         self.__f_logger.info("CREATE SDE FILE")

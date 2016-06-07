@@ -29,7 +29,6 @@ class SdeArchivistProperties:
         self.mail_config = {}
         self.sde_config = {}
         self.sdearchive_config = {}
-        self.ldap_config = {}
         self.log_config = {}
         self.elasticsearch_config = {}
         self.__read_config()
