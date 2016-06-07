@@ -36,6 +36,8 @@ CONFIG_FILE_NAME = "archivist_config.json"
 XML_EXTENSION = ".xml"
 DEFAULT_PW = "test"
 MAIL_ACTIVE = True
+SUCCESS_MAIL_STATE = "success"
+FAILURE_MAIL_STATE = "failure"
 
 ASCII = '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -121,10 +123,6 @@ STEP9 = '''
 ***********************************************
 
 '''
-
-SUCCESS_MAIL_STATE = "success"
-FAILURE_MAIL_STATE = "failure"
-
 
 def handle_process_failure(cont_id,
                            req_id,
@@ -236,11 +234,11 @@ if __name__ == "__main__":
     console_logger = ArchivistLogger.ArchivistLogger(props.log_config).get_console_logger()
     file_logger = ArchivistLogger.ArchivistLogger(props.log_config).get_file_logger()
 
-    console_logger.debug(ASCII)
-    file_logger.debug(ASCII)
+    console_logger.error(ASCII)
+    file_logger.error(ASCII)
 
-    console_logger.debug(STEP1)
-    file_logger.debug(STEP1)
+    console_logger.error(STEP1)
+    file_logger.error(STEP1)
 
     # Create existence validator
     existenceValidator = ExistenceValidator.ExistenceValidator()
@@ -253,6 +251,9 @@ if __name__ == "__main__":
     ms = MailSender.MailSender(props.mail_config)
     ms.set_console_logger(console_logger)
     ms.set_file_logger(file_logger)
+
+    if not props.mail_config["send_mails_to_user"]:
+        MAIL_ACTIVE = False
 
     # Create directory cleaner
     cleaner = BufferCleaner.BufferCleaner()
@@ -269,7 +270,6 @@ if __name__ == "__main__":
         msg = "The program is not able to establish a connection to the archive sde database. " \
               "Please check the log file for further information and a full stack trace"
         ms.send_to_admin(msg)
-        print msg
         sys.exit(1)
 
     # Get oracle database connection
@@ -282,7 +282,6 @@ if __name__ == "__main__":
         msg = "The program is not able to establish a connection to the archive sde database. " \
               "Please check the log file for further information and a full stack trace"
         ms.send_to_admin(msg)
-        print msg
         sys.exit(2)
 
     # Establish ldap connection
@@ -309,7 +308,6 @@ if __name__ == "__main__":
         msg = "The program is not able to establish a connection to the sde (create sde file). " \
               "Please check the log file for further information and a full stack trace"
         ms.send_to_admin(msg)
-        print msg
         sys.exit(3)
     try:
         archive_con = connection_generator_sdearchive.connect()
@@ -317,7 +315,6 @@ if __name__ == "__main__":
         msg = "The program is not able to establish a connection to the archive sde (create sde file). " \
               "Please check the log file for further information and a full stack trace"
         ms.send_to_admin(msg)
-        print msg
         sys.exit(4)
 
     # Get the required tags for the meta data from the config file
@@ -357,8 +354,8 @@ if __name__ == "__main__":
         console_logger.info("ELASICSEARCH is deactivated")
         file_logger.info("ELASICSEARCH is deactivated")
 
-    console_logger.info(STEP2)
-    file_logger.info(STEP2)
+    console_logger.error(STEP2)
+    file_logger.error(STEP2)
 
     # Get the meta data for all entries of the request table if they exist in the database
     # Search is based on the data name
@@ -372,12 +369,12 @@ if __name__ == "__main__":
 
     # If there are at one or more entries in the database table continue for each meta data entry
     if len(raw_meta) > 0:
-        console_logger.info(STEP3)
-        file_logger.info(STEP3)
+        console_logger.error(STEP3)
+        file_logger.error(STEP3)
         for xml in raw_meta:
 
             console_logger.info("\n>>> PROCESSING " + str(xml) + " <<<\n")
-            file_logger.debug("\n>>> PROCESSING " + str(xml) + " <<<\n")
+            file_logger.info("\n>>> PROCESSING " + str(xml) + " <<<\n")
 
             # Get the id of the row in the request table
             console_logger.debug("Fetch the ID of the current entry")
@@ -396,8 +393,8 @@ if __name__ == "__main__":
                 continue
 
             # Verify the current meta data against the required tags specified in the config file
-            console_logger.info(STEP4)
-            file_logger.info(STEP4)
+            console_logger.error(STEP4)
+            file_logger.error(STEP4)
 
             # Meta data object to hold information about the current meta data
             validated_meta = MetaData.MetaData()
@@ -413,8 +410,8 @@ if __name__ == "__main__":
             # Ask the meta data object if there are some issues. If not continue.
             if validated_meta.is_valid():
 
-                console_logger.info(STEP5)
-                file_logger.info(STEP5)
+                console_logger.error(STEP5)
+                file_logger.error(STEP5)
 
                 # Try to export the data to a xml workspace document into the buffer directory
                 try:
@@ -437,8 +434,8 @@ if __name__ == "__main__":
 
                 if existenceValidator.buffered_xml_exists(str(xml) + ".xml"):
                     try:
-                        console_logger.info(STEP6)
-                        file_logger.info(STEP6)
+                        console_logger.error(STEP6)
+                        file_logger.error(STEP6)
 
                         # Create the importer
                         importer = XmlWorkspaceImporter.XmlWorkspaceImporter(archive_conf, SDE_ARCHIVE_DB)
@@ -524,10 +521,9 @@ if __name__ == "__main__":
                                         MAIL_ACTIVE)
                             #ms.send("patrick.hebner@ufz.de", "SUCCESS", SUCCESS_MAIL_STATE)
 
-                            console_logger.info(STEP8)
-                            file_logger.info(STEP8)
+                            console_logger.error(STEP8)
+                            file_logger.error(STEP8)
 
-                            print "CREATE USER"
                             try:
                                 user_service.create_user(org_name)
                                 permission_service.grant_read_permission(str(org_name), str(xml))
@@ -585,8 +581,8 @@ if __name__ == "__main__":
         file_logger.debug("No meta data found for the entries of the request table")
 
     # Get the remaining entries of the request table
-    console_logger.info(STEP9)
-    file_logger.info(STEP9)
+    console_logger.error(STEP9)
+    file_logger.error(STEP9)
 
     # Fetch remaining entries
     remaining = meta_data_service.find_all_requests()

@@ -96,7 +96,8 @@ class SdeArchivistProperties:
                 raise ValueError("Missing mail config entry "
                                  "(smtp_server, port, from, subject, get_user_process_info,"
                                  " password, failure_subject, success_subject,"
-                                 " default_message, admin_recipients)")
+                                 " default_message, admin_recipients,"
+                                 "send_mails_to_user)")
 
     def __extract_sde_config(self, dct):
         if "sde_config" in dct:
@@ -196,6 +197,8 @@ class SdeArchivistProperties:
         if "success_subject" not in config:
             valid_config = False
         if "admin_recipients" not in config:
+            valid_config = False
+        if "send_mails_to_user" not in config:
             valid_config = False
         return valid_config
 
