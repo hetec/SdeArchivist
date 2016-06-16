@@ -31,11 +31,11 @@ class SdeArchivistProperties:
         self.sdearchive_config = {}
         self.log_config = {}
         self.elasticsearch_config = {}
-        self.__read_config()
+        self.__read_config(ref)
 
-    def __read_config(self):
+    def __read_config(self, ref):
         try:
-            config_stream = io.open(file="config/archivist_config.json", encoding="utf-8")
+            config_stream = io.open(file=ref, encoding="utf-8")
             self.__config = json.loads(config_stream.read())
             self.tag_config = self.__extract_tag_config(self.__config)
             self.database_config = self.__extract_db_config(self.__config)

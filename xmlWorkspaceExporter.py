@@ -58,7 +58,6 @@ class XmlWorkspaceExporter:
                                                         "DATA",
                                                         "BINARY",
                                                         "METADATA")
-            print "\nExport to xml file -> " + data.encode('ascii', 'ignore') + " is finished!"
         except arcpy.ExecuteError as e:
             self.__c_logger.exception("EXCEPTION WHILE EXPORTING: " + str(e))
             self.__f_logger.exception("EXCEPTION WHILE EXPORTING: " + str(e))

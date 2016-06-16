@@ -108,13 +108,13 @@ class MetaDataService:
 
     def find_meta_data_by_dataset_names(self):
         """
-        Queries all xml meta data clobs by the names in the ArcGIS requests table
+        Queries all XML meta data CLOBS by the names in the ArcGIS REQUEST table
 
         :return: Meta data (Dictionary)
         :exception: DataException
         """
-        self.__c_logger.info("Find all meta data by dataset name")
-        self.__f_logger.info("Find all meta data by dataset name")
+        self.__c_logger.info("Find all meta data for all data set names")
+        self.__f_logger.info("Find all meta data for all data set names")
         cur = None
         try:
             query = "SELECT i.NAME, t.NAME, i.DOCUMENTATION " \
@@ -136,8 +136,8 @@ class MetaDataService:
                 metas[r[0]] = r[2].read()
             return metas
         except cx_Oracle.DatabaseError as e:
-            self.__c_logger.exception("EXCEPTION WHILE finding meta data by dataset name: " + str(e))
-            self.__f_logger.exception("EXCEPTION WHILE finding meta data by dataset name: " + str(e))
+            self.__c_logger.exception("Error while fetching all data sets: " + str(e))
+            self.__f_logger.exception("Error while fetching all data sets: " + str(e))
             raise DataException("Error while fetching all datasets: " + str(e))
         finally:
             if cur is not None:

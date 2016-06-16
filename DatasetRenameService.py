@@ -18,13 +18,14 @@ class DatasetRenameService:
         :param existence_validator: An existence validator instance
         :return: Name with counter (String)
         """
+        self.__root = archive_properties["project_root"]
         self.__path = archive_properties["project_root"] + "/config/sdearchive.sde/"
         self.__validator = existence_validator
 
     def __check_existence_and_incr(self, name):
         counter = 1
         temp_name = name
-        while self.__validator.imported_sde_data_exists("sdearchive", temp_name):
+        while self.__validator.imported_sde_data_exists(self.__root + "/config/sdearchive", temp_name):
             temp_name = name + "_" + str(counter)
             counter += 1
         return temp_name

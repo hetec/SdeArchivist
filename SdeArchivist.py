@@ -26,13 +26,16 @@ from FailedIndexingCache import FailedIndexingCache
 from UserService import UserService
 from PermissionService import PermissionService
 import sys
+import os
 
 # Do not change this in the rest of the code!
 SDE_SOURCE_DB = "sde"
 SDE_ARCHIVE_DB = "sdearchive"
-BUFFER_DIR = "buffer"
-CONFIG_DIR = "config"
-CONFIG_FILE_NAME = "archivist_config.json"
+abspath = os.path.abspath(__file__)
+ROOT_DIR = os.path.dirname(abspath)
+BUFFER_DIR = ROOT_DIR + "/buffer"
+CONFIG_DIR = ROOT_DIR + "/config"
+CONFIG_FILE_NAME = CONFIG_DIR + "/archivist_config.json"
 XML_EXTENSION = ".xml"
 DEFAULT_PW = "test"
 MAIL_ACTIVE = True
@@ -179,8 +182,12 @@ def check_project_structure(validator):
     config_exists = existenceValidator.directory_exists(CONFIG_DIR)
     config_file_exists = existenceValidator.config_file_exists(CONFIG_FILE_NAME)
 
-    if not buffer_exists or not config_exists or not config_file_exists:
-        raise Exception("Invalid project structure!")
+    if not buffer_exists:
+        raise Exception("Invalid project structure! Missing buffer directory")
+    if not config_exists:
+        raise Exception("Invalid project structure! Missing config directory")
+    if not config_file_exists:
+        raise Exception("Invalid project structure! Missing config file")
 
 
 def get_all_meta_data():
@@ -228,7 +235,7 @@ def inform_user(name, content, state, mail_sender, console_logger, file_logger, 
 if __name__ == "__main__":
 
     # Get config from config/archivist_config.json
-    props = SdeArchivistProperties.SdeArchivistProperties(CONFIG_DIR + "/" + CONFIG_FILE_NAME)
+    props = SdeArchivistProperties.SdeArchivistProperties(CONFIG_FILE_NAME)
 
     # Create loggers
     console_logger = ArchivistLogger.ArchivistLogger(props.log_config).get_console_logger()
@@ -432,7 +439,7 @@ if __name__ == "__main__":
                 console_logger.debug("Check the existence of the exported XML")
                 file_logger.debug("Check the existence of the exported XML")
 
-                if existenceValidator.buffered_xml_exists(str(xml) + ".xml"):
+                if existenceValidator.buffered_xml_exists(BUFFER_DIR + "/" + str(xml) + ".xml"):
                     try:
                         console_logger.error(STEP6)
                         file_logger.error(STEP6)
@@ -467,7 +474,7 @@ if __name__ == "__main__":
                 console_logger.debug("Check the existence of the imported data")
                 file_logger.debug("Check the existence of the imported data")
 
-                if not existenceValidator.imported_sde_data_exists(SDE_ARCHIVE_DB,
+                if not existenceValidator.imported_sde_data_exists(CONFIG_DIR + "/" + SDE_ARCHIVE_DB,
                                                                    SDE_SOURCE_DB + "." + xml.split(".")[1]):
                     handle_process_failure(content_table_id, request_table_id, "The data: " + str(xml) +
                                            " does not exist in the sde archive after the import!",

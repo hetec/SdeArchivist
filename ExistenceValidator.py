@@ -37,7 +37,7 @@ class ExistenceValidator:
         :param file_name: The file to verify (String)
         :return: (Boolean)
         """
-        path = os.path.join(os.path.abspath("buffer"), file_name)
+        path = file_name
         self.__c_logger.debug("Bufferd " + str(file_name) + " exists: " + str(os.path.exists(path)))
         self.__f_logger.debug("Bufferd " + str(file_name) + " exists: " + str(os.path.exists(path)))
         return os.path.exists(path)
@@ -49,7 +49,7 @@ class ExistenceValidator:
         :param file_name: The file to verify (String)
         :return: (Boolean)
         """
-        path = os.path.join(os.path.abspath("config"), file_name)
+        path = file_name
         self.__c_logger.debug(str(file_name) + " exists: " + str(os.path.exists(path)))
         self.__f_logger.debug(str(file_name) + " exists: " + str(os.path.exists(path)))
         return os.path.exists(path)
@@ -62,7 +62,7 @@ class ExistenceValidator:
         :return: (Boolean)
         """
         if self.config_file_exists(connection_name + ".sde"):
-            path = os.path.abspath("config/" + connection_name + ".sde/")
+            path = connection_name + ".sde"
             arcpy.env.workspace = path
             self.__c_logger.debug(str(connection_name) + ".sde" + " exists: " + str(arcpy.Exists(file_name)))
             self.__f_logger.debug(str(connection_name) + ".sde" + " exists: " + str(arcpy.Exists(file_name)))
